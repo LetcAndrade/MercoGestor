@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
-  "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
+    "type-check": "tsc --noEmit",
     "build": "tsc",
-    "start": "node --import tsx src/server.ts"
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +22,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
-    "nodemon": "^3.1.10",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
