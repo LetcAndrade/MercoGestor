@@ -4,7 +4,7 @@ import type { Application } from "express";
 import { errorHandler } from "./middlewares/errorHandler";
 import config from "./config/config";
 import cors from "cors";
-import router from "./routes/index";
+import products from "./routes/productRoutes";
 
 const app: Application = express();
 
@@ -15,7 +15,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes.
-app.use("/api", router);
+app.use("/api/products", products);
 
 // Custom error handler.
 app.use(errorHandler);
