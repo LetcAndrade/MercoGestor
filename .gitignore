@@ -116,10 +116,6 @@ temp/
 
 # Visual Studio Code
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 .history/*
 
 # Miscellaneous
@@ -271,6 +267,8 @@ webpack-stats.json
 # Package Managers
 # ================
 # pnpm
+*pnpm-lock.yaml
+*pnpm-workspace.yaml
 .pnpm-debug.log*
 .pnpm-store/
 
