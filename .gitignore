@@ -1,0 +1,291 @@
+# =======================
+# MercoGestor - .gitignore
+# =======================
+
+# ================
+# Node.js / Backend
+# ================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# ================
+# Angular / Frontend
+# ================
+# Compiled output
+/front/dist/
+/front/tmp/
+/front/out-tsc/
+/front/bazel-out
+
+# Node dependencies
+/front/node_modules/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Angular CLI e2e
+/front/e2e/*.js
+/front/e2e/*.map
+
+# Angular build artifacts
+/front/*.tgz
+
+# ================
+# Database
+# ================
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# MongoDB
+*.log
+
+# ================
+# Environment & Config
+# ================
+# Environment variables
+.env*
+!.env.example
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+
+# Firebase config (keep only example files)
+# firebase-config.js
+# firestore.rules
+# storage.rules
+
+# Firebase Environment Files (CRITICAL SECURITY)
+/front/src/env/enviroment.ts
+/front/src/env/environment.prod.ts
+/front/src/env/environment.*.ts
+/back/src/config/serviceAccountKey.json
+
+# ================
+# Logs
+# ================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ================
+# OS generated files
+# ================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Linux
+*~
+.nfs*
+
+# ================
+# Security & Keys
+# ================
+# Private keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# JWT secrets
+jwt-secret*
+
+# API Keys (já deve estar no .env, mas por segurança)
+api-keys*
+secrets*
+credentials*
+
+# ================
+# Build & Deployment
+# ================
+# Build outputs
+build/
+dist/
+out/
+
+# Docker
+.dockerignore
+
+# Deployment
+deploy/
+deployment/
+
+# ================
+# Testing
+# ================
+# Test coverage
+coverage/
+.nyc_output/
+test-results/
+junit.xml
+
+# Jest
+jest-coverage/
+
+# ================
+# Development Tools
+# ================
+# ESLint
+.eslintcache
+
+# Prettier
+.prettierignore
+
+# TypeScript
+*.tsbuildinfo
+
+# Webpack
+webpack-stats.json
+
+# ================
+# Package Managers
+# ================
+# pnpm
+.pnpm-debug.log*
+.pnpm-store/
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# ================
+# Backup files
+# ================
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
