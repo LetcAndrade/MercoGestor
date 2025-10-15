@@ -1,0 +1,41 @@
+.products-header{
+  display:grid; grid-template-columns: 1fr auto; align-items:center; gap: 12px;
+}
+.products-header .right{ display:flex; gap:8px; flex-wrap: wrap; justify-content:flex-end }
+.products-header .search{ min-width: 240px }
+.products-header .pill{ border-radius: 999px; }
+
+.actions .btn-ghost{
+  background:#fff; border:1px solid #EAD9C1;
+}
+.actions .btn-ghost:hover{ background:#FFF6E9; border-color:#E6D3BA }
+.actions .danger{ color:#B24B3D; border-color:#F0C9C4 }
+.actions .danger:hover{ background:#FFEAE6; }
+
+/* status */
+.badge{
+  display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700;
+  border:1px solid #EAD9C1; background:#fff;
+}
+.badge-ok{ color:#356B4B; border-color:#D8E9DE; background:#F2FBF6 }
+.badge-low{ color:#8A5A22; border-color:#F3E0C7; background:#FFF6E6 }
+.badge-empty{ color:#9E3E34; border-color:#F4C9C1; background:#FFF0ED }
+
+/* modal */
+.overlay{
+  position:fixed; inset:0; background:rgba(33,27,20,.25);
+  backdrop-filter: blur(2px); display:grid; place-items:center; padding: 18px;
+  z-index: 70;
+}
+.modal{
+  width:min(760px, 96vw);
+  animation: popIn .18s ease-out;
+}
+.form-row{ display:grid; grid-template-columns:repeat(3,minmax(160px,1fr)); gap:12px; margin-top:10px }
+.form-row:first-of-type{ grid-template-columns: 2fr 1fr }
+@media (max-width:860px){
+  .form-row{ grid-template-columns:1fr }
+}
+
+@keyframes popIn{ from{ transform:scale(.97); opacity:0 } to{ transform:scale(1); opacity:1 } }
+

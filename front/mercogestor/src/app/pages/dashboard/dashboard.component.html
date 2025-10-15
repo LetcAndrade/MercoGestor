@@ -1,0 +1,65 @@
+<section class="hero card">
+  <div class="hero-art"></div>
+  <div class="hero-titles">
+    <h2>Bem-vindo(a) 👋</h2>
+    <p class="muted">Resumo do seu mercadinho, com um toque leve e ilustrado.</p>
+  </div>
+  <div class="hero-actions">
+    <a routerLink="/produtos" class="btn">+ Novo produto</a>
+    <a routerLink="/movimentacoes" class="btn">Lançar movimentação</a>
+    <button class="btn" (click)="seed()">Carregar dados de exemplo</button>
+  </div>
+</section>
+
+<section class="cards">
+  <div class="kpi card">
+    <span class="kpi-label">Produtos</span>
+    <span class="kpi-value">{{ totalProdutos() }}</span>
+  </div>
+
+  <div class="kpi card">
+    <span class="kpi-label">Estoque total</span>
+    <span class="kpi-value">{{ totalEstoque() }}</span>
+  </div>
+
+  <div class="kpi card warn" [class.zero]="baixoEstoque()===0">
+    <span class="kpi-label">Baixo estoque</span>
+    <span class="kpi-value">{{ baixoEstoque() }}</span>
+  </div>
+
+  <div class="kpi card warn" [class.zero]="pertoVencimento()===0">
+    <span class="kpi-label">Vencimento próximo</span>
+    <span class="kpi-value">{{ pertoVencimento() }}</span>
+  </div>
+</section>
+
+<section class="charts">
+  <div class="chart card">
+    <h3>Entradas × Saídas (30 dias)</h3>
+    <div class="chart-box"><canvas #lineCanvas></canvas></div>
+  </div>
+  <div class="chart card">
+    <h3>Top saídas por produto</h3>
+    <div class="chart-box"><canvas #barCanvas></canvas></div>
+  </div>
+</section>
+
+<section class="recent card" *ngIf="movs.length">
+  <h3>Movimentações recentes</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd.</th><th>Motivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of movs | slice:0:8">
+        <td>{{ m.dataISO | date:'dd/MM' }}</td>
+        <td>{{ nomeDe(m.productId) }}</td>
+        <td>{{ m.tipo === 'in' ? 'Entrada' : 'Saída' }}</td>
+        <td>{{ m.quantidade }}</td>
+        <td>{{ m.motivo || '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

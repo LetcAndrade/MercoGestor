@@ -1,0 +1,47 @@
+.mov-header{
+  display:grid; grid-template-columns: 1fr auto; align-items:center; gap: 12px;
+}
+.mov-header .right{
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+}
+.search{ min-width: 220px }
+
+/* controle segmentado */
+.segmented{
+  display:inline-flex; border:1px solid #EAD9C1; border-radius:999px; background:#fff; overflow:hidden;
+}
+.segmented button{
+  padding:8px 12px; background:transparent; border:0; cursor:pointer; color:#2B2018;
+}
+.segmented button + button{ border-left:1px solid #F0E4D3 }
+.segmented .active{
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  color:#21190F; font-weight:700;
+}
+
+/* badges tipo */
+.badge{
+  display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700;
+  border:1px solid #EAD9C1; background:#fff;
+}
+.badge-in{ color:#356B4B; border-color:#D8E9DE; background:#F2FBF6 }
+.badge-out{ color:#8A5A22; border-color:#F3E0C7; background:#FFF6E6 }
+.neg{ color:#9E3E34; }
+
+/* modal */
+.overlay{
+  position:fixed; inset:0; background:rgba(33,27,20,.25);
+  backdrop-filter: blur(2px); display:grid; place-items:center; padding: 18px; z-index: 70;
+}
+.modal{ width:min(760px, 96vw); animation: popIn .18s ease-out }
+.form-row{ display:grid; grid-template-columns:repeat(3,minmax(160px,1fr)); gap:12px; margin-top:10px }
+@media (max-width:860px){ .form-row{ grid-template-columns:1fr } }
+
+.actions .btn-ghost{
+  background:#fff; border:1px solid #EAD9C1;
+}
+.actions .btn-ghost:hover{ background:#FFF6E9; border-color:#E6D3BA }
+.actions .danger{ color:#B24B3D; border-color:#F0C9C4 }
+.actions .danger:hover{ background:#FFEAE6 }
+
+@keyframes popIn{ from{ transform:scale(.97); opacity:0 } to{ transform:scale(1); opacity:1 } }

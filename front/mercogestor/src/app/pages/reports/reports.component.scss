@@ -1,0 +1,42 @@
+.rep-header{
+  display:grid; grid-template-columns: 1fr auto; align-items:center; gap:12px;
+}
+.rep-header .right{
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+}
+.pill{ border-radius:999px; }
+
+/* Segmentado (mesmo estilo dos outros) */
+.segmented{
+  display:inline-flex; border:1px solid #EAD9C1; border-radius:999px; background:#fff; overflow:hidden;
+}
+.segmented button{ padding:8px 12px; background:transparent; border:0; cursor:pointer; color:#2B2018; }
+.segmented button + button{ border-left:1px solid #F0E4D3 }
+.segmented .active{
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  color:#21190F; font-weight:700;
+}
+
+/* KPIs */
+.kpis{
+  display:grid; grid-template-columns: repeat(4, minmax(180px,1fr));
+  gap: clamp(18px, 2.2vw, 24px);
+  margin-block: 10px clamp(20px, 2.6vw, 32px);
+}
+@media (max-width:980px){ .kpis{ grid-template-columns: repeat(2,1fr); } }
+.kpi{ display:flex; flex-direction:column; gap:6px; align-items:flex-start }
+.kpi-label{ font-size:12px; color:var(--muted) }
+.kpi-value{ font-family:var(--font-title); font-size:32px; line-height:1 }
+.kpi.warn{ border-color:#F4CFBF; box-shadow: 0 10px 24px rgba(230,105,85,.08) }
+
+/* Charts */
+.charts{
+  display:grid; grid-template-columns: 2fr 1fr; gap: clamp(18px, 2.2vw, 24px);
+  margin-block: 8px clamp(20px, 2.6vw, 32px);
+}
+@media (max-width:980px){ .charts{ grid-template-columns: 1fr } }
+.chart h3{ margin-bottom:10px }
+.chart-box{ height: 300px }
+
+/* tabela preview */
+.neg{ color:#9E3E34; }

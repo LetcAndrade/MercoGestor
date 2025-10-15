@@ -1,0 +1,32 @@
+.alerts-header{
+  display:grid; grid-template-columns: 1fr auto; align-items:center; gap:12px;
+}
+.alerts-header .right{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.pill{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 10px; border:1px solid #EAD9C1; border-radius:999px; background:#fff;
+}
+.pill label{ font-size:12px; color:var(--muted) }
+
+.section-head{
+  display:flex; align-items:center; gap:10px; justify-content:space-between; margin-bottom:10px;
+}
+
+/* badges no mesmo esquema do app */
+.badge{
+  display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700;
+  border:1px solid #EAD9C1; background:#fff;
+}
+.badge-low{ color:#8A5A22; border-color:#F3E0C7; background:#FFF6E6 }
+.badge-empty{ color:#9E3E34; border-color:#F4C9C1; background:#FFF0ED }
+.badge-exp{ color:#355E41; border-color:#D8E9DE; background:#F2FBF6 }
+
+/* etiqueta de data */
+.date-badge{
+  display:inline-block; padding:6px 10px; border-radius:10px;
+  background: linear-gradient(180deg,#fff 0%, #FFFEFB 100%);
+  border:1px solid #EFE1CF; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* respiro entre seções */
+section.card + section.card{ margin-top: clamp(18px, 2.2vw, 24px); }

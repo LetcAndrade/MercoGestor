@@ -1,0 +1,36 @@
+/* ===== Spacing upgrade (entre cards/seções) ===== */
+:host{
+  /* knobs para ajustar fácil se quiser mais/menos */
+  --dash-gap: clamp(18px, 2.2vw, 24px);
+  --dash-gap-lg: clamp(20px, 2.8vw, 32px);
+}
+
+/* mais espaço depois do herozinho */
+.hero{ margin-block-end: var(--dash-gap-lg); }
+
+/* KPIs: mais gap entre cards e espaço abaixo do bloco */
+.cards{
+  display: flex;
+  gap: 20px;
+  margin-block: 8px var(--dash-gap-lg);
+  width: 100%;
+}
+
+/* Charts: mais gap e espaço abaixo do bloco */
+.charts{
+  margin-block: 8px var(--dash-gap-lg);
+}
+
+.kpi{
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Recentes: afasta do bloco de cima */
+.recent{ margin-block-start: var(--dash-gap-lg); }
+
+/* Mobile mantém tudo confortável sem exagero */
+@media (max-width: 980px){
+  :host{ --dash-gap: 16px; --dash-gap-lg: 22px; }
+}

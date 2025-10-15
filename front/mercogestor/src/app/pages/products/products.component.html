@@ -1,0 +1,107 @@
+<section class="products-header card">
+  <div class="left">
+    <h2>Produtos</h2>
+    <p class="muted">Gerencie catálogo e níveis mínimos de estoque.</p>
+  </div>
+
+  <div class="right">
+    <input class="input search" [(ngModel)]="busca"
+           placeholder="Buscar por nome..." />
+    <select class="input pill" [(ngModel)]="cat">
+      <option value="">Todas categorias</option>
+      <option *ngFor="let c of categorias()" [value]="c">{{ c }}</option>
+    </select>
+    <select class="input pill" [(ngModel)]="status">
+      <option value="all">Todos</option>
+      <option value="ok">OK</option>
+      <option value="low">Baixo estoque</option>
+      <option value="empty">Esgotado</option>
+    </select>
+    <button class="btn btn-primary" (click)="novo()">+ Novo produto</button>
+  </div>
+</section>
+
+<section class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Categoria</th>
+        <th>Un.</th>
+        <th>Mínimo</th>
+        <th>Em estoque</th>
+        <th>Status</th>
+        <th style="width:1%"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of list()">
+        <td>{{ p.nome }}</td>
+        <td>{{ p.categoria || '—' }}</td>
+        <td>{{ p.unidade }}</td>
+        <td>{{ p.minimo }}</td>
+        <td>{{ estoqueDe(p) }}</td>
+        <td>
+          <span class="badge"
+                [class.badge-ok]="statusDe(p)==='ok'"
+                [class.badge-low]="statusDe(p)==='low'"
+                [class.badge-empty]="statusDe(p)==='empty'">
+            {{ statusDe(p)==='ok' ? 'OK' : (statusDe(p)==='low' ? 'Baixo' : 'Esgotado') }}
+          </span>
+        </td>
+        <td class="actions">
+          <button class="btn btn-ghost" (click)="editar(p)">Editar</button>
+          <button class="btn btn-ghost danger" (click)="excluir(p)">Remover</button>
+        </td>
+      </tr>
+      <tr *ngIf="!list().length">
+        <td colspan="7" class="muted" style="padding:14px 12px">Nenhum produto encontrado.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Modal simples -->
+<div class="overlay" *ngIf="showForm()">
+  <div class="modal card">
+    <h3>{{ editing() ? 'Editar produto' : 'Novo produto' }}</h3>
+
+    <div class="form-row">
+      <div>
+        <div class="label">Nome</div>
+        <input class="input" [(ngModel)]="form().nome" placeholder="Ex.: Arroz 5kg">
+      </div>
+      <div>
+        <div class="label">Categoria</div>
+        <input class="input" [(ngModel)]="form().categoria" placeholder="Ex.: Mercearia">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <div class="label">Unidade</div>
+        <select class="input" [(ngModel)]="form().unidade">
+          <option value="un">un</option>
+          <option value="kg">kg</option>
+          <option value="l">l</option>
+          <option value="cx">cx</option>
+        </select>
+      </div>
+      <div>
+        <div class="label">Mínimo</div>
+        <input class="input" type="number" min="0" [(ngModel)]="form().minimo">
+      </div>
+      <div>
+        <div class="label">Preço (opcional)</div>
+        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="form().preco" placeholder="0,00">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" (click)="cancelar()">Cancelar</button>
+      <button class="btn btn-primary" [disabled]="!form().nome.trim()" (click)="salvar()">
+        {{ editing() ? 'Salvar' : 'Adicionar' }}
+      </button>
+    </div>
+  </div>
+</div>

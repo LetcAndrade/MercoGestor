@@ -1,0 +1,129 @@
+<section class="mov-header card">
+  <div class="left">
+    <h2>Movimentações</h2>
+    <p class="muted">Lance entradas e saídas, filtre por período e produto.</p>
+  </div>
+
+  <div class="right">
+    <div class="segmented">
+      <button [class.active]="tipo()==='all'" (click)="tipo.set('all')">Todas</button>
+      <button [class.active]="tipo()==='in'"  (click)="tipo.set('in')">Entradas</button>
+      <button [class.active]="tipo()==='out'" (click)="tipo.set('out')">Saídas</button>
+    </div>
+
+    <input class="input search" [(ngModel)]="busca" placeholder="Buscar produto..." />
+    <input class="input" type="date" [(ngModel)]="de">
+    <input class="input" type="date" [(ngModel)]="ate">
+
+    <div class="actions">
+      <button class="btn" (click)="abrir('in')">+ Entrada</button>
+      <button class="btn" (click)="abrir('out')">– Saída</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Qtd.</th>
+        <th *ngIf="tipo()==='all' || tipo()==='in'">Preço/Lote</th>
+        <th *ngIf="tipo()==='all' || tipo()==='out'">Motivo</th>
+        <th style="width:1%"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of list()">
+        <td>{{ m.dataISO | date:'dd/MM/yyyy' }}</td>
+        <td>{{ nomeDe(m.productId) }}</td>
+        <td>
+          <span class="badge" [class.badge-in]="m.tipo==='in'" [class.badge-out]="m.tipo==='out'">
+            {{ m.tipo==='in' ? 'Entrada' : 'Saída' }}
+          </span>
+        </td>
+        <td [class.neg]="m.tipo==='out'">{{ m.tipo==='out' ? ('-' + m.quantidade) : m.quantidade }}</td>
+
+        <td *ngIf="tipo()==='all' || tipo()==='in'">
+          <div class="muted" *ngIf="m.tipo==='in'">
+            <ng-container *ngIf="m.precoUnitario">R$ {{ m.precoUnitario | number:'1.2-2' }}</ng-container>
+            <ng-container *ngIf="m.validadeLote"> • Val.: {{ m.validadeLote | date:'dd/MM' }}</ng-container>
+            <ng-container *ngIf="!m.precoUnitario && !m.validadeLote">—</ng-container>
+          </div>
+        </td>
+
+        <td *ngIf="tipo()==='all' || tipo()==='out'">{{ m.tipo==='out' ? (m.motivo || 'sale') : '—' }}</td>
+
+        <td class="actions">
+          <button class="btn btn-ghost danger" (click)="remover(m)">Remover</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="!list().length">
+        <td colspan="7" class="muted" style="padding:14px 12px">Nenhuma movimentação encontrada.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Modal -->
+<div class="overlay" *ngIf="showForm()">
+  <div class="modal card">
+    <h3>{{ formTipo()==='in' ? 'Lançar entrada' : 'Lançar saída' }}</h3>
+
+    <div class="form-row">
+      <div>
+        <div class="label">Produto</div>
+        <select class="input" [(ngModel)]="form().productId">
+          <option value="">Selecione…</option>
+          <option *ngFor="let p of prods()" [value]="p.id">
+            {{ p.nome }} (estoque: {{ estoqueDe(p.id) }})
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <div class="label">Quantidade</div>
+        <input class="input" type="number" min="1" [(ngModel)]="form().quantidade">
+      </div>
+
+      <div>
+        <div class="label">Data</div>
+        <input class="input" type="date" [(ngModel)]="form().data">
+      </div>
+    </div>
+
+    <!-- Campos só para ENTRADA -->
+    <div class="form-row" *ngIf="formTipo()==='in'">
+      <div>
+        <div class="label">Preço unitário (opcional)</div>
+        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="form().precoUnitario" placeholder="0,00">
+      </div>
+      <div>
+        <div class="label">Validade do lote (opcional)</div>
+        <input class="input" type="date" [(ngModel)]="form().validadeLote">
+      </div>
+    </div>
+
+    <!-- Campos só para SAÍDA -->
+    <div class="form-row" *ngIf="formTipo()==='out'">
+      <div>
+        <div class="label">Motivo</div>
+        <select class="input" [(ngModel)]="form().motivo">
+          <option value="sale">Venda/Consumo</option>
+          <option value="waste">Descarte</option>
+          <option value="adjust">Ajuste</option>
+        </select>
+      </div>
+    </div>
+
+    <p *ngIf="erro()" class="error">{{ erro() }}</p>
+
+    <div class="actions">
+      <button class="btn" (click)="fechar()">Cancelar</button>
+      <button class="btn btn-primary" (click)="salvar()">Lançar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,99 @@
+<section class="login-wrap">
+  <!-- HERO: arte cartoon suave -->
+  <div class="login-hero">
+    <div class="hero-art" aria-hidden="true">
+      <div class="blob blob--honey"></div>
+      <div class="blob blob--sage"></div>
+
+      <div class="sticker sticker--tag">Oferta</div>
+      <div class="sticker sticker--leaf" aria-hidden="true">🍃</div>
+      <div class="sticker sticker--tomato" aria-hidden="true">🍅</div>
+
+      <svg class="sparkles" viewBox="0 0 120 60" aria-hidden="true">
+        <g fill="none" stroke="#F1A340" stroke-width="2" stroke-linecap="round">
+          <path d="M10 30 h10" />
+          <path d="M20 30 l6 -6" />
+          <path d="M36 30 h10" />
+          <path d="M62 20 h8" />
+          <path d="M86 34 h12" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="brand-hero">
+      <svg class="logo" viewBox="0 0 48 48" role="img" aria-label="Mercadinho Raiz">
+        <circle cx="24" cy="24" r="22" fill="#7EBB95"/>
+        <path d="M28 16c-3 0-5 2-5 5v11h-3v-8h-4v8h-3V18h3v4h4v-4h8z" fill="#FFF9F1"/>
+      </svg>
+      <div class="brand-titles">
+        <h1 class="brand-title">Mercadinho</h1>
+        <h1 class="brand-title alt">Raiz</h1>
+        <span class="underline" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <p class="tagline">Controle de estoque com charme de ilustração, leve e eficiente.</p>
+
+    <ul class="chips" aria-label="Destaques">
+      <li class="chip">Entradas &amp; saídas</li>
+      <li class="chip">Alertas de validade</li>
+      <li class="chip">Relatórios claros</li>
+    </ul>
+  </div>
+
+  <!-- CARD de login -->
+  <form class="login-card card" #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+    <h2>Entrar</h2>
+    <p class="muted intro">Use um e-mail e senha (≥ 3 caracteres).</p>
+
+    <div class="field" style="margin-top:14px">
+      <label class="label" for="email">E-mail</label>
+      <input
+        id="email"
+        class="input"
+        name="email"
+        type="email"
+        [(ngModel)]="email"
+        #emailCtrl="ngModel"
+        email
+        required
+        placeholder="ex.: admin&#64;mercado.com"
+        autocomplete="email"
+        [class.invalid]="emailCtrl.invalid && (emailCtrl.touched || f.submitted)"
+        aria-describedby="email-err">
+
+      <div class="field-error" id="email-err"
+           *ngIf="emailCtrl.errors && (emailCtrl.touched || f.submitted)">
+        <span *ngIf="emailCtrl.errors['required']">Informe um e-mail.</span>
+        <span *ngIf="emailCtrl.errors['email']">E-mail inválido.</span>
+      </div>
+
+      <small class="help">Dica: <b>admin&#64;mercado.com</b> entra como <b>admin</b>.</small>
+    </div>
+
+    <div class="field" style="margin-top:10px">
+      <label class="label" for="password">Senha</label>
+      <input
+        id="password"
+        class="input"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        minlength="3"
+        placeholder="••••••"
+        autocomplete="current-password"
+        required>
+    </div>
+
+    <p *ngIf="error" class="error" role="alert">{{ error }}</p>
+
+    <div class="actions" style="margin-top:14px">
+      <button class="btn" type="button" (click)="guest()" [disabled]="loading">
+        Entrar como convidado
+      </button>
+      <button class="btn btn-primary" type="submit" [disabled]="loading || f.invalid">
+        Entrar
+      </button>
+    </div>
+  </form>
+</section>

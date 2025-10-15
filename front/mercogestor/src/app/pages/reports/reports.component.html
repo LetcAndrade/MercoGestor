@@ -1,0 +1,96 @@
+<section class="rep-header card">
+  <div class="left">
+    <h2>Relatórios</h2>
+    <p class="muted">Filtre o período e visualize entradas × saídas e os itens mais movimentados.</p>
+  </div>
+
+  <div class="right">
+    <div class="segmented">
+      <button [class.active]="tipo()==='all'" (click)="setTipo('all')">Todas</button>
+      <button [class.active]="tipo()==='in'"  (click)="setTipo('in')">Entradas</button>
+      <button [class.active]="tipo()==='out'" (click)="setTipo('out')">Saídas</button>
+    </div>
+
+    <select class="input pill" [ngModel]="agrupar()" (ngModelChange)="setAgrupar($event)">
+      <option value="day">Dia</option>
+      <option value="month">Mês</option>
+    </select>
+
+    <select class="input pill" [ngModel]="produtoId()" (ngModelChange)="setProdutoId($event)">
+      <option value="">Todos produtos</option>
+      <option *ngFor="let p of prods()" [value]="p.id">{{ p.nome }}</option>
+    </select>
+
+    <input class="input" type="date" [ngModel]="de()"  (ngModelChange)="setDe($event)">
+    <input class="input" type="date" [ngModel]="ate()" (ngModelChange)="setAte($event)">
+
+    <button class="btn" (click)="exportDetalhado()">Exportar CSV (detalhado)</button>
+    <button class="btn btn-primary" (click)="exportResumido()">Exportar CSV (resumo)</button>
+  </div>
+</section>
+
+<section class="kpis">
+  <div class="kpi card">
+    <span class="kpi-label">Entradas</span>
+    <span class="kpi-value">{{ kEntradas() }}</span>
+  </div>
+  <div class="kpi card">
+    <span class="kpi-label">Saídas</span>
+    <span class="kpi-value">{{ kSaidas() }}</span>
+  </div>
+  <div class="kpi card" [class.warn]="kSaldo()<0">
+    <span class="kpi-label">Saldo (E − S)</span>
+    <span class="kpi-value">{{ kSaldo() }}</span>
+  </div>
+  <div class="kpi card">
+    <span class="kpi-label">Movimentações</span>
+    <span class="kpi-value">{{ kMovs() }}</span>
+  </div>
+</section>
+
+<section class="charts">
+  <div class="chart card">
+    <h3>Entradas × Saídas por {{ agrupar()==='day' ? 'dia' : 'mês' }}</h3>
+    <div class="chart-box"><canvas #timeCanvas></canvas></div>
+  </div>
+  <div class="chart card">
+    <h3>Top saídas por produto</h3>
+    <div class="chart-box"><canvas #topCanvas></canvas></div>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Prévia ({{ lista().length }} linhas)</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Qtd.</th>
+        <th>Preço/Lote/Motivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of lista() | slice:0:12">
+        <td>{{ m.dataISO | date:'dd/MM/yyyy' }}</td>
+        <td>{{ nomeDe(m.productId) }}</td>
+        <td>{{ m.tipo === 'in' ? 'Entrada' : 'Saída' }}</td>
+        <td [class.neg]="m.tipo==='out'">{{ m.tipo==='out' ? ('-' + m.quantidade) : m.quantidade }}</td>
+        <td>
+          <ng-container *ngIf="m.tipo==='in'">
+            <span *ngIf="m.precoUnitario">R$ {{ m.precoUnitario | number:'1.2-2' }}</span>
+            <span *ngIf="m.validadeLote"> • Val.: {{ m.validadeLote | date:'dd/MM' }}</span>
+            <span *ngIf="!m.precoUnitario && !m.validadeLote">—</span>
+          </ng-container>
+          <ng-container *ngIf="m.tipo==='out'">
+            {{ m.motivo || '—' }}
+          </ng-container>
+        </td>
+      </tr>
+      <tr *ngIf="!lista().length">
+        <td colspan="5" class="muted" style="padding:14px 12px">Sem dados para os filtros escolhidos.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

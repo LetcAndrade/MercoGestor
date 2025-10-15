@@ -1,0 +1,93 @@
+<section class="alerts-header card">
+  <div class="left">
+    <h2>Alertas</h2>
+    <p class="muted">Acompanhe itens com <b>estoque baixo</b> e <b>validade próxima</b>.</p>
+  </div>
+
+  <div class="right">
+    <div class="pill">
+      <label>Validade até</label>
+      <input class="input" type="number" min="1"
+       [ngModel]="dias()"
+       (ngModelChange)="setDias($event)"
+       style="width:90px">
+      <span>dias</span>
+    </div>
+    <a routerLink="/movimentacoes" class="btn">Lançar movimentação</a>
+    <a routerLink="/produtos" class="btn">Abrir produtos</a>
+  </div>
+</section>
+
+<!-- ESTOQUE BAIXO -->
+<section class="card">
+  <div class="section-head">
+    <h3>Estoque baixo / esgotado</h3>
+    <button class="btn btn-primary" (click)="exportCsv('stock')" [disabled]="!low().length">Exportar CSV</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Categoria</th>
+        <th>Em estoque</th>
+        <th>Mínimo</th>
+        <th>Falta</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let i of low()">
+        <td>{{ i.produto.nome }}</td>
+        <td>{{ i.produto.categoria || '—' }}</td>
+        <td>{{ i.estoque }}</td>
+        <td>{{ i.minimo }}</td>
+        <td>{{ i.falta }}</td>
+        <td>
+          <span class="badge"
+                [class.badge-empty]="i.status==='empty'"
+                [class.badge-low]="i.status==='low'">
+            {{ i.status==='empty' ? 'Esgotado' : 'Baixo' }}
+          </span>
+        </td>
+      </tr>
+      <tr *ngIf="!low().length">
+        <td colspan="6" class="muted" style="padding:14px 12px">Sem alertas de estoque no momento.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- VALIDADE PRÓXIMA -->
+<section class="card">
+  <div class="section-head">
+    <h3>Validade próxima (≤ {{ dias() }} dias)</h3>
+    <button class="btn btn-primary" (click)="exportCsv('expiry')" [disabled]="!expiries().length">Exportar CSV</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Categoria</th>
+        <th>Validade</th>
+        <th>Em</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of expiries()">
+        <td>{{ e.produto.nome }}</td>
+        <td>{{ e.produto.categoria || '—' }}</td>
+        <td>
+          <span class="date-badge">{{ e.dataISO | date:'dd/MM/yyyy' }}</span>
+        </td>
+        <td>
+          <span class="badge badge-exp"> {{ e.dias }} dia{{ e.dias===1?'':'s' }} </span>
+        </td>
+      </tr>
+      <tr *ngIf="!expiries().length">
+        <td colspan="4" class="muted" style="padding:14px 12px">Nenhuma validade próxima nos próximos {{ dias() }} dias.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

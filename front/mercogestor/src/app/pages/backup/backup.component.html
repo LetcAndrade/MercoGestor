@@ -1,0 +1,43 @@
+<section class="card">
+  <div class="head">
+    <div>
+      <h2>Backup</h2>
+      <p class="muted">Exporte/importe seus dados. Ative o <b>backup diário automático</b> para baixar um JSON ao iniciar o app cada dia.</p>
+    </div>
+    <div class="switch pill">
+      <input type="checkbox" [ngModel]="auto" (ngModelChange)="setAuto($event)" id="autoBk">
+      <label for="autoBk">Backup diário automático</label>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="box">
+      <h3>Exportar</h3>
+      <p class="muted">Último backup diário: <b>{{ last() }}</b></p>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="baixarAgora()">Gerar backup JSON (agora)</button>
+        <button class="btn" (click)="exportCsvProdutos()">CSV — Produtos</button>
+        <button class="btn" (click)="exportCsvMovs()">CSV — Movimentações</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>Importar / Restaurar</h3>
+      <p class="muted">Selecione um arquivo <b>.json</b> previamente exportado.</p>
+      <input type="file" accept=".json,application/json" (change)="importar($event)">
+      <div class="actions">
+        <button class="btn btn-danger" (click)="limparTudo()">Limpar dados locais</button>
+      </div>
+    </div>
+  </div>
+
+  <p *ngIf="msg()" class="toast">{{ msg() }}</p>
+</section>
+
+<section class="card">
+  <h3>Resumo atual</h3>
+  <div class="stats">
+    <div><span class="label">Produtos</span><span class="value">{{ store.products().length }}</span></div>
+    <div><span class="label">Movimentações</span><span class="value">{{ store.movements().length }}</span></div>
+  </div>
+</section>

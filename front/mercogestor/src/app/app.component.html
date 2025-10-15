@@ -1,0 +1,24 @@
+<header class="header" *ngIf="auth.isAuthed()">
+  <div class="container header-inner">
+    <a class="brand" routerLink="/">
+      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="#2FA36B" />
+        <path d="M28 16c-3 0-5 2-5 5v11h-3v-8h-4v8h-3V18h3v4h4v-4h8z" fill="#FFF8EC"/>
+      </svg>
+      <span class="name">Mercadinho Raiz</span>
+    </a>
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
+      <a routerLink="/produtos" routerLinkActive="active">Produtos</a>
+      <a routerLink="/movimentacoes" routerLinkActive="active">Movimentações</a>
+      <a routerLink="/alertas" routerLinkActive="active">Alertas</a>
+      <a routerLink="/relatorios" routerLinkActive="active">Relatórios</a>
+      <a routerLink="/backup" routerLinkActive="active">Backup</a>
+      <button class="btn" (click)="auth.logout()">Sair</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container page">
+  <router-outlet />
+</main>

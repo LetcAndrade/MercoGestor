@@ -1,0 +1,211 @@
+/* =================== LOGIN (responsivo + cartoon creme) =================== */
+
+/* Tokens locais */
+:host{
+  --ink: var(--ink, #2B2018);
+  --muted: var(--muted, rgba(43,32,24,.65));
+  --accent: var(--accent, #F1A340);
+  --accent-2: var(--accent-2, #78B68D);
+  --cream: var(--color-bg, #FFF8EC);
+  --radius: 16px;
+  --shadow-a: 0 1px 2px rgba(25,15,10,.04), 0 12px 28px rgba(25,15,10,.08);
+  --shadow-b: 0 10px 24px rgba(161,116,53,.12);
+}
+
+/* ===== Layout base (mais respiro e centralizado) ===== */
+.login-wrap{
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  column-gap: clamp(40px, 6vw, 96px);    /* + espaço entre colunas */
+  row-gap: clamp(16px, 4vw, 32px);
+  align-items: center;
+  max-width: 1240px;                     /* centraliza conteúdo */
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 48px);
+  padding-block: clamp(28px, 8vh, 72px);
+}
+@media (max-width: 980px){
+  .login-wrap{ grid-template-columns: 1fr; padding-block-end: 42px; }
+}
+
+/* ---------- HERO ---------- */
+.login-hero{ position:relative; padding: clamp(12px,2vw,24px) clamp(4px,1vw,8px); }
+
+/* ANTES: inset:-40px -80px auto -80px (invadia a área do card)
+   AGORA: limitamos à coluna esquerda (right:0), mantendo halo amplo. */
+.hero-art{
+  position:absolute;
+  inset: -30px 0 auto -60px;   /* não “vaza” pra direita */
+  height: 80%;
+  z-index:-1; pointer-events:none;
+}
+
+/* Blobs orgânicos */
+.blob{
+  position:absolute; filter: blur(2px);
+  border-radius: 44% 56% 50% 50% / 58% 44% 56% 42%;
+  animation: blobPulse 9s ease-in-out infinite;
+}
+.blob--honey{
+  left:-6%; top:-10%;
+  width: 48vw; max-width: 680px; height: 50vh; max-height: 460px;
+  background:
+    radial-gradient(60% 70% at 40% 40%, #FFE6BE 0, #FFD9A0 40%, rgba(0,0,0,0) 70%),
+    radial-gradient(60% 70% at 80% 70%, #FFF3E2, rgba(0,0,0,0) 70%);
+  opacity:.8;
+}
+.blob--sage{
+  right:-8%; top:8%;
+  width: 40vw; max-width: 520px; height: 40vh; max-height: 360px;
+  background: radial-gradient(70% 70% at 50% 50%, #CFE7D7 0, #BFE0CB 45%, rgba(0,0,0,0) 70%);
+  opacity:.55; animation-delay:.6s;
+}
+
+/* Sparkles */
+.sparkles{ position:absolute; left:22%; top:14%; width:170px; opacity:.55; animation: floatX 6s ease-in-out infinite }
+
+/* Adesivos (afastados do card) */
+.sticker{
+  position:absolute; padding:8px 12px; border-radius:999px; font-weight:700;
+  background:#fff; border:1px dashed #E6D3BA; box-shadow: var(--shadow-b);
+  color:#3a3028; transform: rotate(-6deg);
+  animation: floatY 5.4s ease-in-out infinite;
+}
+.sticker--tag{ left:12%; top:56%; }       /* + distante do divisor */
+.sticker--leaf{ right:18%; top:18%; transform: rotate(12deg); animation-duration:7s; }
+.sticker--tomato{ right:12%; top:66%; transform: rotate(-10deg); animation-duration:6.2s; }
+
+/* Marca */
+.brand-hero{ display:flex; align-items:center; gap:16px; position:relative; z-index:1; }
+.logo{
+  width:64px; height:64px; border-radius:16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 28px rgba(126,187,149,.18);
+  animation: popIn .6s ease-out both;
+}
+.brand-titles{ position:relative; }
+.brand-title{
+  font-family: var(--font-title, ui-serif);
+  font-size: clamp(40px, 7vw, 68px);
+  line-height:.9; margin:0; color:#2E261E; letter-spacing:.2px;
+  text-shadow: 0 2px 0 rgba(255,255,255,.4);
+}
+.brand-title.alt{
+  margin-top:-8px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.underline{
+  position:absolute; left:6px; bottom:-8px; height:9px; width:120%;
+  background: linear-gradient(90deg, #FFE6BE, #FFD9A0 40%, #D7ECD9 90%);
+  border-radius: 12px; filter: blur(2px);
+  animation: shimmer 2.8s linear infinite; background-size:200% 100%;
+}
+
+/* Texto & chips */
+.tagline{ font-size: clamp(16px, 2vw, 20px); margin:14px 0 12px; color:var(--muted) }
+.chips{ display:flex; flex-wrap:wrap; gap:10px; padding:0; margin:10px 0 0; list-style:none }
+.chip{
+  background:#fff; border:1px solid #EEDCC6; color:#4a3f36;
+  border-radius:999px; padding:8px 12px; font-weight:700;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.chip:hover{ transform: translateY(-2px); box-shadow: 0 10px 20px rgba(161,116,53,.14) }
+
+/* ---------- CARD ---------- */
+.login-card{
+  max-width: 520px;
+  margin-left:auto;
+  position:relative; overflow:hidden;
+  border: 1px solid rgba(43,32,24,.10);
+  border-radius: var(--radius);
+  padding: clamp(16px, 2.5vw, 22px);
+  background: linear-gradient(180deg, #fff 0%, #FFFEFB 100%);
+  box-shadow: var(--shadow-a);
+}
+.login-card::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(60% 60% at 10% -10%, #FFF7E9, transparent 60%),
+    radial-gradient(50% 40% at 120% 20%, #FFF0E0 0, transparent 60%);
+  opacity:.8; pointer-events:none;
+}
+.intro{ margin-top:-6px }
+
+/* Form */
+.field{ margin-top:14px }
+.label{ font-size:12px; color:var(--muted); margin-bottom:6px; display:block }
+.input{
+  width:100%; padding:12px 14px; border:1px solid #E7D9C6; border-radius:14px;
+  background:#FFFEFB; color:var(--ink); font:inherit;
+  transition: border-color .18s, box-shadow .18s, background .18s, transform .18s;
+}
+.input:hover{ background:#FFFAF3 }
+.input:focus{
+  outline:none; border-color: var(--accent);
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 18%, transparent);
+  background:#FFF9F0;
+}
+
+.actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px }
+.btn{
+  padding:10px 14px; border-radius:12px; border:1px solid rgba(43,32,24,.12);
+  background:#fff; cursor:pointer; transition:transform .02s ease, background .15s ease;
+}
+.btn:hover{ background:#fffef7 }
+.btn:active{ transform: translateY(1px) }
+.btn-primary{
+  border-color: transparent; background: var(--accent-2); color:#fff; font-weight:700;
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--accent-2) 30%, transparent);
+}
+.error{ color:#E56B55; margin:10px 0 0 }
+
+/* ---------- Responsividade ---------- */
+.hero-art { z-index: 0; }
+.brand-hero { position: relative; z-index: 1; }
+.sticker, .sparkles { pointer-events: none; z-index: 0; }
+
+/* >=1280px */
+@media (min-width: 1280px) {
+  .sticker--tag    { left: 10%; top: 10%; }
+  .sticker--leaf   { right: 40%; top: -10%; }
+  .sticker--tomato { right: 14%; top: 50%; }
+}
+/* 980–1279px */
+@media (min-width: 980px) and (max-width: 1279px) {
+  .sticker--tag    { left: 8%;  top: 50%; }
+  .sticker--leaf   { right: 12%; top: 20%; }
+  .sticker--tomato { right: 10%; top: 70%; }
+}
+/* <980px */
+@media (max-width: 979px) {
+  .login-card{ margin: 8px auto 0; }
+  .brand-hero{ gap:12px; }
+  .brand-title{ font-size: clamp(36px, 10vw, 56px); }
+
+  .hero-art{ inset:-24px 0 auto -40px; height: 72%; } /* ainda sem invadir o card */
+
+  .blob--honey { left: -12%; top: -14%; width: 72vw; height: 44vh; }
+  .blob--sage  { right: -12%; top:   8%; width: 58vw; height: 36vh; }
+
+  .sparkles    { left: 18%; top: 10%; width: 120px; opacity: .48; }
+  .sticker     { transform: none; font-size: 14px; padding:6px 10px }
+  .sticker--leaf{ display:none } /* simplifica em telas pequenas */
+}
+/* super pequeno */
+@media (max-width: 520px){
+  .chips{ gap:8px }
+  .chip{ padding:6px 10px }
+}
+
+/* ---------- Motion ---------- */
+@keyframes floatY{ from{ transform: translateY(0) } 50%{ transform: translateY(-8px) } to{ transform: translateY(0) } }
+@keyframes floatX{ from{ transform: translateX(0) } 50%{ transform: translateX(6px) } to{ transform: translateX(0) } }
+@keyframes blobPulse{ from{ transform: scale(1) rotate(0deg) } 50%{ transform: scale(1.03) rotate(1.5deg) } to{ transform: scale(1) rotate(0deg) } }
+@keyframes popIn{ from{ transform: scale(.92); opacity:0 } to{ transform: scale(1); opacity:1 } }
+@keyframes shimmer{ 0%{ background-position: -200% 0 } 100%{ background-position: 200% 0 } }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}

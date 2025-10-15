@@ -1,0 +1,21 @@
+<section class="card">
+  <h2>Usuários</h2>
+  <p class="muted">Troque rapidamente entre perfis para testar permissões.</p>
+
+  <div class="field" style="margin-top:10px">
+    <label class="label">Perfil</label>
+    <select class="input" [ngModel]="current()" (ngModelChange)="setRole($event)">
+      <option *ngFor="let r of roles" [value]="r">{{ r === 'admin' ? 'Administrador' : 'Operador' }}</option>
+    </select>
+  </div>
+
+  <div class="actions" style="margin-top:12px">
+    <button class="btn btn-primary" (click)="login()">Entrar como perfil selecionado</button>
+    <button class="btn" (click)="logout()" *ngIf="auth.isAuthed()">Sair</button>
+  </div>
+
+  <div style="margin-top:12px" *ngIf="auth.isAuthed()">
+    <span class="muted">Logado como:</span>
+    <b>{{ auth.user()?.email }}</b> — <i>{{ auth.role() }}</i>
+  </div>
+</section>

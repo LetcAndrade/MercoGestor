@@ -1,0 +1,64 @@
+/* ===== Header com a identidade creme ===== */
+.header{
+  position: sticky; top: 0; z-index: 50;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.90) 0%, rgba(255,249,241,.88) 100%);
+  backdrop-filter: saturate(1.05) blur(6px);
+  border-bottom: 1px solid #F0E4D3;
+  box-shadow: 0 10px 28px rgba(161,116,53,.10);
+}
+
+/* container interno */
+.header-inner{
+  height: 72px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* Marca */
+.brand{ display:flex; align-items:center; gap:10px; color:var(--ink); }
+.brand .logo{
+  width: 28px; height: 28px; border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 14px rgba(126,187,149,.18);
+}
+.brand .name{
+  font-family: var(--font-title);
+  font-weight: 700; letter-spacing: .2px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* Navegação (pílulas) */
+.nav{ display:flex; gap: 8px; margin-left:auto; align-items:center; }
+
+.nav a{
+  padding: 8px 12px; border-radius: 999px;
+  border: 1px solid #EAD9C1; background: #fff; color: var(--ink);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  transition: transform .02s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+  white-space: nowrap;
+}
+.nav a:hover{
+  background: #FFF6E9; border-color: #E6D3BA;
+  box-shadow: 0 8px 18px rgba(161,116,53,.12);
+}
+.nav a.active{
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #21190F; font-weight: 700;
+  box-shadow: 0 10px 22px rgba(241,163,64,.22), 0 8px 18px rgba(126,187,149,.16);
+}
+
+/* Botão Sair (estilo “ghost” cremoso) */
+.nav .btn{
+  padding: 8px 12px; border-radius: 999px;
+  border: 1px solid #EAD9C1; background:#fff; color: var(--ink);
+  transition: background .18s ease, border-color .18s ease, transform .02s ease;
+}
+.nav .btn:hover{ background:#FFF2E2; border-color:#E3CDAF }
+.nav .btn:active{ transform: translateY(1px) }
+
+/* Responsivo: vira “carrossel” horizontal de chips */
+@media (max-width: 980px){
+  .header-inner{ height: auto; padding: 10px 0; align-items:flex-start; row-gap: 10px; }
+  .nav{ width: 100%; overflow: auto hidden; -webkit-overflow-scrolling: touch; }
+  .nav a, .nav .btn{ white-space: nowrap; }
+}

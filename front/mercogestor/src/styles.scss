@@ -1,0 +1,131 @@
+/* ========= Identidade VISUAL (Creme + Mel & Sálvia) com animações ========= */
+:root{
+  /* Paleta base */
+  --bg:        #FFF9F1;  /* creme */
+  --surface:   #FFFFFF;  /* cartões/inputs */
+  --surface-2: #FFF1DD;  /* realce quente */
+  --ink:       #2E261E;  /* texto principal */
+  --muted:     #8B7F74;  /* texto secundário */
+
+  /* Acentos */
+  --accent:    #F1A340;  /* mel */
+  --accent-2:  #7EBB95;  /* sálvia */
+  --accent-3:  #F17864;  /* coral suave */
+  --danger:    #E66955;
+
+  /* Tokens */
+  --radius: 16px;
+  --gap: 12px;
+  --shadow-a: 0 1px 2px rgba(0,0,0,.05), 0 12px 28px rgba(161,116,53,.12);
+  --shadow-b: 0 1px 2px rgba(0,0,0,.05), 0 6px 16px rgba(161,116,53,.10);
+
+  --font-title: 'Fraunces', ui-serif, Georgia, serif;
+  --font-body:  'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* Animações (tempos) */
+  --t-fast: .18s;
+  --t-med:  .35s;
+  --t-slow: .9s;
+}
+
+/* ===== Base ===== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:
+    radial-gradient(120% 100% at 10% -10%, #fff 0, #FFF3E5 55%, transparent 60%),
+    radial-gradient(120% 100% at 110% 10%, #FDF2DF 0, transparent 60%),
+    var(--bg);
+  color:var(--ink);font:14px/1.65 var(--font-body);
+}
+h1,h2,h3{font-family:var(--font-title);margin:0 0 8px;color:var(--ink)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+
+.muted{color:var(--muted)}
+.help{font-size:12px;color:var(--muted)}
+
+/* Leve “grão” para vibe cartoon impressa */
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:multiply;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.15"/></svg>');
+}
+
+/* ===== Helpers ===== */
+.container{max-width:1080px;margin:0 auto;padding:0 16px}
+.page{padding:28px 0}
+.grid{display:grid;gap:var(--gap)}
+.card{
+  background: linear-gradient(180deg, var(--surface) 0%, #FFFEFB 100%);
+  border: 1px solid #F2E6D6;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-a);
+  padding: 20px;
+  transition: transform var(--t-med) ease, box-shadow var(--t-med) ease;
+}
+.card:hover{ transform: translateY(-2px); box-shadow: 0 16px 36px rgba(161,116,53,.16) }
+
+/* ===== Botões ===== */
+.btn{
+  padding:11px 16px;border-radius:14px;border:1px solid #E8DAC7;background:#fff;color:var(--ink);
+  cursor:pointer; transition: transform .02s ease, background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+}
+.btn:hover{ background:#FFF7EC; border-color:#E6D3BA }
+.btn:active{ transform: translateY(1px) }
+.btn-primary{
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  color:#21190F; font-weight:700;
+  box-shadow: 0 10px 24px rgba(241,163,64,.25), 0 6px 16px rgba(126,187,149,.18);
+}
+.btn-primary:hover{ filter:brightness(.98) }
+.btn-primary[disabled]{opacity:.6;cursor:not-allowed;box-shadow:none}
+.btn-danger{border-color:transparent;background:var(--danger);color:#fff}
+
+/* Micro-ripple sem JS */
+.btn:where(.btn,.btn-primary){ position:relative; overflow:hidden }
+.btn:where(.btn,.btn-primary)::after{
+  content:""; position:absolute; inset:auto; left:50%; top:50%; width:0; height:0; border-radius:50%;
+  background:rgba(255,255,255,.35); transform:translate(-50%,-50%); transition:width .45s ease,height .45s ease,opacity .45s ease;
+  opacity:0;
+}
+.btn:active::after{ width:220px; height:220px; opacity:1 }
+
+/* ===== Form ===== */
+.label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.input, select{
+  width:100%; padding:12px 14px; border:1px solid #E7D9C6; border-radius:14px;
+  background:#FFFEFB; color:var(--ink); font:inherit;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast), transform var(--t-fast);
+}
+.input::placeholder{color:#B4A79B}
+.input:focus{
+  outline:none; border-color: var(--accent);
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 18%, transparent);
+  background:#FFF9F0;
+}
+
+/* ===== Tabela (para as próximas telas) ===== */
+.table{width:100%;border-collapse:separate;border-spacing:0 10px}
+.table thead th{font-weight:700;color:var(--muted);text-align:left;padding:0 12px 6px}
+.table tbody tr{
+  background: var(--surface);
+  border:1px solid #F0E3D2;
+  border-radius:14px; box-shadow: var(--shadow-b);
+}
+.table td{padding:12px 12px;border-top:1px solid #F3E7D8}
+.table td:first-child{border-radius:14px 0 0 14px}
+.table td:last-child{border-radius:0 14px 14px 0}
+
+/* ===== Animações utilitárias ===== */
+@keyframes floatY{ from{ transform: translateY(0) } 50%{ transform: translateY(-8px) } to{ transform: translateY(0) } }
+@keyframes floatX{ from{ transform: translateX(0) } 50%{ transform: translateX(6px) } to{ transform: translateX(0) } }
+@keyframes blobPulse{ from{ transform: scale(1) rotate(0deg) } 50%{ transform: scale(1.03) rotate(1.5deg) } to{ transform: scale(1) rotate(0deg) } }
+@keyframes popIn{ from{ transform: scale(.92); opacity:0 } to{ transform: scale(1); opacity:1 } }
+@keyframes shimmer{ 0%{ background-position: -200% 0 } 100%{ background-position: 200% 0 } }
+
+/* Acessibilidade: reduzir movimento */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
