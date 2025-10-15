@@ -5,60 +5,177 @@ import { db } from "../config/firebase";
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
     // Attempts to create a product, and if an error occurs, passes the error to the error handler.
     try {
-        // 1. Pegar dados do corpo da requisição
         const { nome, preco, categoria, estoque } = req.body;
 
-        // 2. Validação dos dados recebidos
+        // Verifying that the received data is valid.
         if (!nome || !preco || !categoria) {
-            // Retorna um erro 400 (Bad Request) se faltarem dados essenciais
             return res.status(400).json({
-                sucesso: false,
-                erro: 'Nome, preço e categoria são obrigatórios.'
+                success: false,
+                error: 'Nome, preço e categoria são obrigatórios.'
             });
         }
 
-        // 3. Criar o objeto do produto com os dados validados
-        const novoProduto = {
+        // Creating the product object.
+        const newProduct = {
             nome: nome,
             preco: parseFloat(preco),
             categoria: categoria,
-            estoque: parseInt(estoque) || 0, // Garante um valor padrão de 0 se o estoque não for fornecido
+            estoque: parseInt(estoque) || 0,
             dataCadastro: new Date()
         };
 
-        // 4. Salvar o novo produto no Firebase Firestore
-        const produtoRef = await db.collection('produtos').add(novoProduto);
+        // Saving the product in the database.
+        const productRef = await db.collection('produtos').add(newProduct);
 
-        // 5. Retornar uma resposta de sucesso (201 - Created)
         res.status(201).json({
-            sucesso: true,
-            mensagem: 'Produto cadastrado com sucesso!',
-            produtoId: produtoRef.id
+            success: true,
+            message: 'Produto cadastrado com sucesso!',
+            productID: productRef.id
         });
-
     } catch (error) {
-        // 6. Se ocorrer qualquer erro durante o processo, passa para o próximo middleware (error handler)
-        // Isso mantém o código mais limpo, delegando o tratamento de erros a um local centralizado.
         next(error);
     }
 };
 
 // Read all products.
-export const getProducts = (req: Request, res: Response, next: NextFunction) => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     // Attempts to read the products, and if an error occurs, passes the error to the error handler.
+    try {
+        const productsSnapshot = await db.collection('produtos').get();
+
+        // Checking if there are products.
+        if (productsSnapshot.empty) {
+            return res.status(200).json({
+                success: true,
+                message: 'Nenhum produto cadastrado.',
+                products: [],
+            });
+        }
+
+        // Converting to JS object and returning.
+        const products = productsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        res.status(200).json({
+            success: true,
+            products: products
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Read single product.
-export const getProductById = (req: Request, res: Response, next: NextFunction) => {
+export const getProductById = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
     // Attempts to read a product, and if an error occurs, passes the error to the error handler.
+    try {
+        const id = req.params.id;
+        const product = await db.collection('produtos').doc(id).get();
+
+        // Checking if the product with the specified ID exists.
+        if (!product.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Produto não encontrado.',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            product: {
+                id: product.id,
+                ...product.data(),
+            },
+        });
+    } catch(error) {
+        next(error);
+    }
 };
 
 // Update a product.
-export const updateProduct = (req: Request, res: Response, next: NextFunction) => {
+export const updateProduct = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
     // Attempts to update a product, and if an error occurs, passes the error to the error handler.
+    try {
+        const id = req.params.id;
+        const { nome, preco, categoria, estoque } = req.body;
+
+        const productRef = db.collection('produtos').doc(id);
+        const product = await productRef.get();
+
+        // Checking if the product with the specified ID exists.
+        if (!product.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Produto não encontrado.',
+            });
+        }
+
+        // Creating a product with updated fields.
+        const updatedFields: Record<string, any> = {};
+        if (nome !== undefined) updatedFields.nome = nome;
+        if (preco !== undefined) updatedFields.preco = parseFloat(preco);
+        if (categoria !== undefined) updatedFields.categoria = categoria;
+        if (estoque !== undefined) updatedFields.estoque = parseInt(estoque);
+
+        // Checking if any fields have been filled in.
+        if (Object.keys(updatedFields).length == 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Nenhum campo para atualização foi enviado.',
+            });
+        }
+
+        // Updating the database and returning.
+        await productRef.update({
+            ...updatedFields,
+        });
+
+        const updatedProduct = await productRef.get();
+
+        res.status(200).json({
+            success: true,
+            message: 'Produto atualizado com sucesso!',
+            product: {
+                id: updatedProduct.id,
+                ...updatedProduct.data(),
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Delete a product.
-export const deleteProduct = (req: Request, res: Response, next: NextFunction) => {
+export const deleteProduct = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
     // Attempts to delete a product, and if an error occurs, passes the error to the next function.
+    try {
+        const id = req.params.id;
+
+        const productRef = db.collection('produtos').doc(id);
+        const product = await productRef.get();
+
+        // Checking if the product with the specified ID exists.
+        if (!product.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Produto não encontrado.',
+            });
+        }
+
+        // Deleting the product.
+        await productRef.delete();
+
+        res.status(200).json({
+            success: true,
+            message: 'Produto removido com sucesso!',
+            deletedProduct: {
+                id: product.id,
+                ...product.data(),
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
 };

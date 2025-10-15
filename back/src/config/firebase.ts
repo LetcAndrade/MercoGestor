@@ -1,10 +1,6 @@
-// src/config/firebase.ts
-
 import * as admin from 'firebase-admin';
-import { type ServiceAccount } from 'firebase-admin';
-
-// @ts-ignore
-const serviceAccountKey = require('../../config/serviceAccountKey.json');
+import type { ServiceAccount } from 'firebase-admin';
+import serviceAccountKey from '../config/serviceAccountKey.json';
 
 // Verifique se o serviceAccountKey tem as propriedades esperadas
 const serviceAccount = serviceAccountKey as ServiceAccount;
