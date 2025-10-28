@@ -176,6 +176,18 @@ export const deleteProduct = async (req: Request<{id: string}>, res: Response, n
             });
         }
 
+        // Deleting all movements with the product.
+        const movementsSnapshot = await db.collection('movimentos').where('productId', '==', id).get();
+        if (!movementsSnapshot.empty) {
+            const batch = db.batch();
+
+            movementsSnapshot.docs.splice(0, 500).forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+        }
+
         // Deleting the product.
         await productRef.delete();
 
