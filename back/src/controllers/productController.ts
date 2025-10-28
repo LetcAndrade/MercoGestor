@@ -5,27 +5,38 @@ import { db } from "../config/firebase";
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
     // Attempts to create a product, and if an error occurs, passes the error to the error handler.
     try {
-        const { nome, preco, categoria, estoque } = req.body;
+        const { nome, unidade, minimo, preco, categoria } = req.body;
 
         // Verifying that the received data is valid.
-        if (!nome || !preco || !categoria) {
+        if (!nome || !unidade || minimo == undefined) {
             return res.status(400).json({
                 success: false,
-                error: 'Nome, preço e categoria são obrigatórios.'
+                error: 'Nome, unidade e quantidade mínima são obrigatórios.'
             });
         }
 
         // Creating the product object.
         const newProduct = {
             nome: nome,
-            preco: parseFloat(preco),
-            categoria: categoria,
-            estoque: parseInt(estoque) || 0,
-            dataCadastro: new Date()
+            unidade: unidade,
+            minimo: parseFloat(minimo),
+            preco: parseFloat(preco) ?? null,
+            categoria: categoria ?? '',
         };
 
+        // Checking if the product already exists.
+        const productsRef = db.collection('produtos');
+        const queryRef = await productsRef.where('nome', '==', nome).limit(1).get();
+
+        if (!queryRef.empty) {
+            return res.status(409).json({
+                success: false,
+                error: 'Produto já existe.',
+            });
+        }
+
         // Saving the product in the database.
-        const productRef = await db.collection('produtos').add(newProduct);
+        const productRef = await productsRef.add(newProduct);
 
         res.status(201).json({
             success: true,
@@ -99,7 +110,7 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
     // Attempts to update a product, and if an error occurs, passes the error to the error handler.
     try {
         const id = req.params.id;
-        const { nome, preco, categoria, estoque } = req.body;
+        const { nome, unidade, minimo, preco, categoria } = req.body;
 
         const productRef = db.collection('produtos').doc(id);
         const product = await productRef.get();
@@ -115,9 +126,10 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
         // Creating a product with updated fields.
         const updatedFields: Record<string, any> = {};
         if (nome !== undefined) updatedFields.nome = nome;
+        if (unidade !== undefined) updatedFields.unidade = unidade;
+        if (minimo !== undefined) updatedFields.minimo = parseFloat(minimo);
         if (preco !== undefined) updatedFields.preco = parseFloat(preco);
         if (categoria !== undefined) updatedFields.categoria = categoria;
-        if (estoque !== undefined) updatedFields.estoque = parseInt(estoque);
 
         // Checking if any fields have been filled in.
         if (Object.keys(updatedFields).length == 0) {
