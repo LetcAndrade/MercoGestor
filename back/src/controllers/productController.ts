@@ -11,7 +11,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         if (!nome || !unidade || minimo == undefined) {
             return res.status(400).json({
                 success: false,
-                error: 'Nome, unidade e quantidade mínima são obrigatórios.'
+                error: 'Nome, unidade e quantidade mínima são obrigatórios.',
             });
         }
 
@@ -26,13 +26,24 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
         // Checking if the product already exists.
         const productsRef = db.collection('produtos');
-        const queryRef = await productsRef.where('nome', '==', nome).limit(1).get();
+        const productQueryRef = await productsRef.where('nome', '==', nome).limit(1).get();
 
-        if (!queryRef.empty) {
+        if (!productQueryRef.empty) {
             return res.status(409).json({
                 success: false,
                 error: 'Produto já existe.',
             });
+        }
+
+        // Checking if the category exists.
+        if (categoria) {
+            const categoryQueryRef = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
+            if (categoryQueryRef.empty) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Categoria informada não existe.',
+                });
+            }
         }
 
         // Saving the product in the database.
@@ -41,7 +52,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         res.status(201).json({
             success: true,
             message: 'Produto cadastrado com sucesso!',
-            productID: productRef.id
+            productId: productRef.id,
         });
     } catch (error) {
         next(error);
@@ -71,7 +82,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
         res.status(200).json({
             success: true,
-            products: products
+            products,
         });
     } catch (error) {
         next(error);
@@ -123,13 +134,25 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
             });
         }
 
-        // Creating a product with updated fields.
+        // Creating a product with updated fields, and checking if the category exists (if it is specified).
         const updatedFields: Record<string, any> = {};
         if (nome !== undefined) updatedFields.nome = nome;
         if (unidade !== undefined) updatedFields.unidade = unidade;
         if (minimo !== undefined) updatedFields.minimo = parseFloat(minimo);
         if (preco !== undefined) updatedFields.preco = parseFloat(preco);
-        if (categoria !== undefined) updatedFields.categoria = categoria;
+        if (categoria !== undefined) {
+            if (categoria) {
+                const categoryQueryRef = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
+                if (categoryQueryRef.empty) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Categoria informada não existe.',
+                    });
+                }
+            }
+
+            updatedFields.categoria = categoria;
+        }
 
         // Checking if any fields have been filled in.
         if (Object.keys(updatedFields).length == 0) {

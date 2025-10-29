@@ -2,6 +2,7 @@ import express from "express";
 import type { Application } from "express";
 
 import { errorHandler } from "./middlewares/errorHandler";
+import categories from "./routes/categoryRoutes";
 import config from "./config/config";
 import cors from "cors";
 import movements from "./routes/movementRoutes";
@@ -16,6 +17,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes.
+app.use("/api/categories", categories);
 app.use("/api/movements", movements);
 app.use("/api/products", products);
 

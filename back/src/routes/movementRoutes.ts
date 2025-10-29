@@ -3,7 +3,7 @@ import { createMovement, getMovements, getMovementById, updateMovement, deleteMo
 
 const router: Router = Router();
 
-// Product routes.
+// Movement routes.
 router.post('/', createMovement);
 
 router.get('/', getMovements);
