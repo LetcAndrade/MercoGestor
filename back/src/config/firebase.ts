@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import type { ServiceAccount } from 'firebase-admin';
+import type { Auth } from 'firebase-admin/auth';
 import serviceAccountKey from '../config/serviceAccountKey.json';
 
 // Verifique se o serviceAccountKey tem as propriedades esperadas
@@ -11,4 +12,5 @@ admin.initializeApp({
 });
 
 // Exporta a instância do Firestore para ser usada em outros lugares
+export const auth: Auth = admin.auth();
 export const db = admin.firestore();

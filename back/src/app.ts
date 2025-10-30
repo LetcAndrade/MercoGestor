@@ -7,6 +7,7 @@ import config from "./config/config";
 import cors from "cors";
 import movements from "./routes/movementRoutes";
 import products from "./routes/productRoutes";
+import users from "./routes/userRoutes";
 
 const app: Application = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/categories", categories);
 app.use("/api/movements", movements);
 app.use("/api/products", products);
+app.use("/api/users", users);
 
 // Custom error handler.
 app.use(errorHandler);
