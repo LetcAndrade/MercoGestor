@@ -22,9 +22,9 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
         // Checking if the category already exists.
         const categoriesRef = db.collection('categorias');
-        const queryRef = await categoriesRef.where('categoria', '==', categoria).limit(1).get();
+        const categoryQueryRef = await categoriesRef.where('categoria', '==', categoria).limit(1).get();
 
-        if (!queryRef.empty) {
+        if (!categoryQueryRef.empty) {
             return res.status(409).json({
                 success: false,
                 error: 'Categoria já existe.',
@@ -48,10 +48,10 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
     // Attempts to read the categories, and if an error occurs, passes the error to the error handler.
     try {
-        const categoriesSnapshot = await db.collection('categorias').get();
+        const categoriesQuerySnap = await db.collection('categorias').get();
 
         // Checking if there are categories.
-        if (categoriesSnapshot.empty) {
+        if (categoriesQuerySnap.empty) {
             return res.status(200).json({
                 success: true,
                 message: 'Nenhuma categoria cadastrada.',
@@ -60,7 +60,7 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
         }
 
         // Converting to JS object and returning.
-        const categories = categoriesSnapshot.docs.map(doc => ({
+        const categories = categoriesQuerySnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
         }));
@@ -82,10 +82,10 @@ export const updateCategory = async (req: Request<{id: string}>, res: Response, 
         const { categoria } = req.body;
 
         const categoryRef = db.collection('categorias').doc(id);
-        const category = await categoryRef.get();
+        const categorySnap = await categoryRef.get();
 
         // Checking if the category with the specified ID exists.
-        if (!category.exists) {
+        if (!categorySnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Categoria não encontrada.',
@@ -109,14 +109,14 @@ export const updateCategory = async (req: Request<{id: string}>, res: Response, 
             ...updatedFields,
         });
 
-        const updatedCategory = await categoryRef.get();
+        const updatedCategorySnap = await categoryRef.get();
 
         res.status(200).json({
             success: true,
             message: 'Categoria atualizada com sucesso!',
             category: {
-                id: updatedCategory.id,
-                ...updatedCategory.data(),
+                id: updatedCategorySnap.id,
+                ...updatedCategorySnap.data(),
             },
         });
     } catch (error) {
@@ -131,10 +131,10 @@ export const deleteCategory = async (req: Request<{id: string}>, res: Response, 
         const id = req.params.id;
 
         const categoryRef = db.collection('categorias').doc(id);
-        const category = await categoryRef.get();
+        const categorySnap = await categoryRef.get();
 
         // Checking if the category with the specified ID exists.
-        if (!category.exists) {
+        if (!categorySnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Categoria não encontrada.',
@@ -142,13 +142,13 @@ export const deleteCategory = async (req: Request<{id: string}>, res: Response, 
         }
 
         // Changing the products that belong to this category.
-        const data = category.data();
+        const data = categorySnap.data();
         if (data) {
-            const productSnapshot = await db.collection('produtos').where('categoria', '==', data.categoria).get();
-            if (!productSnapshot.empty) {
+            const productQuerySnap = await db.collection('produtos').where('categoria', '==', data.categoria).get();
+            if (!productQuerySnap.empty) {
                 const batch = db.batch();
 
-                productSnapshot.docs.splice(0, 500).forEach(doc => {
+                productQuerySnap.docs.splice(0, 500).forEach(doc => {
                     batch.update(doc.ref, { categoria: '' });
                 })
 
@@ -163,7 +163,7 @@ export const deleteCategory = async (req: Request<{id: string}>, res: Response, 
             success: true,
             message: 'Categoria removida com sucesso!',
             deletedCategory: {
-                id: category.id,
+                id,
                 ...data,
             },
         });

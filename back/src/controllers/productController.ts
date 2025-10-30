@@ -26,9 +26,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
         // Checking if the product already exists.
         const productsRef = db.collection('produtos');
-        const productQueryRef = await productsRef.where('nome', '==', nome).limit(1).get();
+        const productQuerySnap = await productsRef.where('nome', '==', nome).limit(1).get();
 
-        if (!productQueryRef.empty) {
+        if (!productQuerySnap.empty) {
             return res.status(409).json({
                 success: false,
                 error: 'Produto já existe.',
@@ -37,8 +37,8 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
         // Checking if the category exists.
         if (categoria) {
-            const categoryQueryRef = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
-            if (categoryQueryRef.empty) {
+            const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
+            if (categoryQuerySnap.empty) {
                 return res.status(400).json({
                     success: false,
                     error: 'Categoria informada não existe.',
@@ -63,10 +63,10 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     // Attempts to read the products, and if an error occurs, passes the error to the error handler.
     try {
-        const productsSnapshot = await db.collection('produtos').get();
+        const productsQuerySnap = await db.collection('produtos').get();
 
         // Checking if there are products.
-        if (productsSnapshot.empty) {
+        if (productsQuerySnap.empty) {
             return res.status(200).json({
                 success: true,
                 message: 'Nenhum produto cadastrado.',
@@ -75,7 +75,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         }
 
         // Converting to JS object and returning.
-        const products = productsSnapshot.docs.map(doc => ({
+        const products = productsQuerySnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
         }));
@@ -94,10 +94,10 @@ export const getProductById = async (req: Request<{id: string}>, res: Response, 
     // Attempts to read a product, and if an error occurs, passes the error to the error handler.
     try {
         const id = req.params.id;
-        const product = await db.collection('produtos').doc(id).get();
+        const productSnap = await db.collection('produtos').doc(id).get();
 
         // Checking if the product with the specified ID exists.
-        if (!product.exists) {
+        if (!productSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Produto não encontrado.',
@@ -107,8 +107,8 @@ export const getProductById = async (req: Request<{id: string}>, res: Response, 
         res.status(200).json({
             success: true,
             product: {
-                id: product.id,
-                ...product.data(),
+                id: productSnap.id,
+                ...productSnap.data(),
             },
         });
     } catch(error) {
@@ -124,10 +124,10 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
         const { nome, unidade, minimo, preco, categoria } = req.body;
 
         const productRef = db.collection('produtos').doc(id);
-        const product = await productRef.get();
+        const productSnap = await productRef.get();
 
         // Checking if the product with the specified ID exists.
-        if (!product.exists) {
+        if (!productSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Produto não encontrado.',
@@ -142,8 +142,8 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
         if (preco !== undefined) updatedFields.preco = parseFloat(preco);
         if (categoria !== undefined) {
             if (categoria) {
-                const categoryQueryRef = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
-                if (categoryQueryRef.empty) {
+                const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
+                if (categoryQuerySnap.empty) {
                     return res.status(400).json({
                         success: false,
                         error: 'Categoria informada não existe.',
@@ -167,14 +167,14 @@ export const updateProduct = async (req: Request<{id: string}>, res: Response, n
             ...updatedFields,
         });
 
-        const updatedProduct = await productRef.get();
+        const updatedProductSnap = await productRef.get();
 
         res.status(200).json({
             success: true,
             message: 'Produto atualizado com sucesso!',
             product: {
-                id: updatedProduct.id,
-                ...updatedProduct.data(),
+                id: updatedProductSnap.id,
+                ...updatedProductSnap.data(),
             },
         });
     } catch (error) {
@@ -189,10 +189,10 @@ export const deleteProduct = async (req: Request<{id: string}>, res: Response, n
         const id = req.params.id;
 
         const productRef = db.collection('produtos').doc(id);
-        const product = await productRef.get();
+        const productSnap = await productRef.get();
 
         // Checking if the product with the specified ID exists.
-        if (!product.exists) {
+        if (!productSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Produto não encontrado.',
@@ -200,11 +200,11 @@ export const deleteProduct = async (req: Request<{id: string}>, res: Response, n
         }
 
         // Deleting all movements with the product.
-        const movementsSnapshot = await db.collection('movimentos').where('productId', '==', id).get();
-        if (!movementsSnapshot.empty) {
+        const movementsQuerySnap = await db.collection('movimentos').where('productId', '==', id).get();
+        if (!movementsQuerySnap.empty) {
             const batch = db.batch();
 
-            movementsSnapshot.docs.splice(0, 500).forEach(doc => {
+            movementsQuerySnap.docs.splice(0, 500).forEach(doc => {
                 batch.delete(doc.ref);
             });
 
@@ -212,14 +212,15 @@ export const deleteProduct = async (req: Request<{id: string}>, res: Response, n
         }
 
         // Deleting the product.
+        const data = productSnap.data();
         await productRef.delete();
 
         res.status(200).json({
             success: true,
             message: 'Produto removido com sucesso!',
             deletedProduct: {
-                id: product.id,
-                ...product.data(),
+                id,
+                ...data,
             },
         });
     } catch (error) {

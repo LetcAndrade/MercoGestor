@@ -16,8 +16,8 @@ export const createMovement = async (req: Request, res: Response, next: NextFunc
         }
 
         // Checking if the product exists.
-        const product = await db.collection('produtos').doc(productId).get();
-        if (!product.exists) {
+        const productSnap = await db.collection('produtos').doc(productId).get();
+        if (!productSnap.exists) {
             return res.status(400).json({
                 success: false,
                 error: 'O código do produto deve referenciar um produto existente.',
@@ -55,18 +55,18 @@ export const getMovements = async (req: Request, res: Response, next: NextFuncti
         const { tipo, inicio, fim } = req.query;
 
         // Filtering movements.
-        let queryRef: FirebaseFirestore.Query = db.collection('movimentos');
+        let query: FirebaseFirestore.Query = db.collection('movimentos');
         if (tipo && tipo != 'all') {
-            queryRef = queryRef.where('tipo', '==', tipo);
+            query = query.where('tipo', '==', tipo);
         }
 
         if (inicio && fim) {
-            queryRef = queryRef.where('dataISO', '>=', inicio).where('dataISO', '<=', fim);
+            query = query.where('dataISO', '>=', inicio).where('dataISO', '<=', fim);
         }
 
         // Checking if there are movements.
-        const movementsSnapshot = await queryRef.get();
-        if (movementsSnapshot.empty) {
+        const movementsQuerySnap = await query.get();
+        if (movementsQuerySnap.empty) {
             return res.status(200).json({
                 success: true,
                 message: 'Nenhuma movimentação cadastrada.',
@@ -75,7 +75,7 @@ export const getMovements = async (req: Request, res: Response, next: NextFuncti
         }
 
         // Converting to JS object and returning.
-        const movements = movementsSnapshot.docs.map(doc => ({
+        const movements = movementsQuerySnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
         }));
@@ -94,10 +94,10 @@ export const getMovementById = async (req: Request<{id: string}>, res: Response,
     // Attempts to read a movement, and if an error occurs, passes the error to the error handler.
     try {
         const id = req.params.id;
-        const movement = await db.collection('movimentos').doc(id).get();
+        const movementSnap = await db.collection('movimentos').doc(id).get();
 
         // Checking if the movement with the specified ID exists.
-        if (!movement.exists) {
+        if (!movementSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Movimento não encontrado.',
@@ -107,8 +107,8 @@ export const getMovementById = async (req: Request<{id: string}>, res: Response,
         res.status(200).json({
             success: true,
             movement: {
-                id: movement.id,
-                ...movement.data(),
+                id: movementSnap.id,
+                ...movementSnap.data(),
             },
         });
     } catch (error) {
@@ -124,10 +124,10 @@ export const updateMovement = async (req: Request<{id: string}>, res: Response, 
         const { productId, tipo, quantidade, dataISO, precoUnitario, validadeLote, motivo } = req.body;
 
         const movementRef = db.collection('movimentos').doc(id);
-        const movement = await movementRef.get()
+        const movementSnap = await movementRef.get()
 
         // Checking if the movement with the specified ID exists.
-        if (!movement.exists) {
+        if (!movementSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Movimento não encontrado.',
@@ -154,8 +154,8 @@ export const updateMovement = async (req: Request<{id: string}>, res: Response, 
 
         // Checking if the product exists.
         if (productId) {
-            const product = await db.collection('produtos').doc(productId).get();
-            if (!product.exists) {
+            const productSnap = await db.collection('produtos').doc(productId).get();
+            if (!productSnap.exists) {
                 return res.status(400).json({
                     success: false,
                     error: 'O código do produto deve referenciar um produto existente.',
@@ -168,14 +168,14 @@ export const updateMovement = async (req: Request<{id: string}>, res: Response, 
             ...updatedFields,
         });
 
-        const updatedMovement = await movementRef.get();
+        const updatedMovementSnap = await movementRef.get();
 
         res.status(200).json({
             success: true,
             message: 'Movimento atualizado com sucesso!',
-            product: {
-                id: updatedMovement.id,
-                ...updatedMovement.data(),
+            movement: {
+                id: updatedMovementSnap.id,
+                ...updatedMovementSnap.data(),
             },
         });
     } catch (error) {
@@ -190,10 +190,10 @@ export const deleteMovement = async (req: Request<{id: string}>, res: Response, 
         const id = req.params.id;
 
         const movementRef = db.collection('movimentos').doc(id);
-        const movement = await movementRef.get();
+        const movementSnap = await movementRef.get();
 
         // Checking if the movement with the specified ID exists.
-        if (!movement.exists) {
+        if (!movementSnap.exists) {
             return res.status(404).json({
                 success: false,
                 error: 'Movimento não encontrado.',
@@ -201,14 +201,15 @@ export const deleteMovement = async (req: Request<{id: string}>, res: Response, 
         }
 
         // Deleting the movement.
+        const data = movementSnap.data();
         await movementRef.delete();
 
         res.status(200).json({
             success: true,
             message: 'Movimento removido com sucesso!',
             deletedMovement: {
-                id: movement.id,
-                ...movement.data(),
+                id,
+                ...data,
             },
         });
     } catch (error) {
