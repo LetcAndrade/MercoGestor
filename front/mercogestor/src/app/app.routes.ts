@@ -13,7 +13,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent, title: 'Entrar — Mercadinho Raiz' },
 
   { path: '', component: DashboardComponent, canActivate:[authGuard], title: 'Início' },
-  { path: 'produtos', component: ProductsComponent, canActivate:[authGuard], title: 'Produtos' },
+  { path: 'produtos', component: ProductsComponent, title: 'Produtos' },
   { path: 'movimentacoes', component: MovementsComponent, canActivate:[authGuard], title: 'Entradas & Saídas' },
   { path: 'alertas', component: AlertsComponent, canActivate:[authGuard], title: 'Alertas' },
   { path: 'relatorios', component: ReportsComponent, canActivate:[authGuard], title: 'Relatórios' },
