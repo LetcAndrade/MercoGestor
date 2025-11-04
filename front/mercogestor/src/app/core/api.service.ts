@@ -26,12 +26,12 @@ export class ApiService {
 
   // PRODUCTS
   listProducts(): Observable<Produto[]> {
-    return this.http.get<Produto[]>(`${API}/products`);
+    return this.http.get<Produto[]>(`${API}/products/`);
   }
   saveProduct(p: Produto): Observable<Produto> {
     return p.id
       ? this.http.put<Produto>(`${API}/products/${p.id}`, p)
-      : this.http.post<Produto>(`${API}/products`, p);
+      : this.http.post<Produto>(`${API}/products/`, p);
   }
   deleteProduct(id: string | number): Observable<void> {
     return this.http.delete<void>(`${API}/products/${id}`);
