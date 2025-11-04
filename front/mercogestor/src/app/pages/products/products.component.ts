@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Api, Produto, Movimento } from '../../core/api';
+import { ApiService, Produto, Movimento } from '../../core/api.service';
 
 type StatusFiltro = 'all' | 'ok' | 'low' | 'empty';
 type FormModel = { nome: string; categoria: string; unidade: string; minimo: number; preco?: number };
@@ -14,7 +14,7 @@ type FormModel = { nome: string; categoria: string; unidade: string; minimo: num
   styleUrls: ['./products.component.scss']
 })
 export class ProductsComponent {
-  private api = inject(Api);
+  private api = inject(ApiService);
 
   // dados principais
   produtos = signal<Produto[]>([]);
