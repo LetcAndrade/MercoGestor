@@ -1,3 +1,5 @@
+<!-- products.component.html -->
+
 <section class="products-header card">
   <div class="left">
     <h2>Produtos</h2>
@@ -5,18 +7,36 @@
   </div>
 
   <div class="right">
-    <input class="input search" [(ngModel)]="busca"
-           placeholder="Buscar por nome..." />
-    <select class="input pill" [(ngModel)]="cat">
+    <!-- busca -->
+    <input
+      class="input search"
+      [ngModel]="busca()"
+      (ngModelChange)="busca.set($event)"
+      placeholder="Buscar por nome..."
+    />
+
+    <!-- categoria -->
+    <select
+      class="input pill"
+      [ngModel]="cat()"
+      (ngModelChange)="cat.set($event)"
+    >
       <option value="">Todas categorias</option>
       <option *ngFor="let c of categorias()" [value]="c">{{ c }}</option>
     </select>
-    <select class="input pill" [(ngModel)]="status">
+
+    <!-- status -->
+    <select
+      class="input pill"
+      [ngModel]="status()"
+      
+    >
       <option value="all">Todos</option>
       <option value="ok">OK</option>
       <option value="low">Baixo estoque</option>
       <option value="empty">Esgotado</option>
     </select>
+
     <button class="btn btn-primary" (click)="novo()">+ Novo produto</button>
   </div>
 </section>
@@ -42,10 +62,12 @@
         <td>{{ p.minimo }}</td>
         <td>{{ estoqueDe(p) }}</td>
         <td>
-          <span class="badge"
-                [class.badge-ok]="statusDe(p)==='ok'"
-                [class.badge-low]="statusDe(p)==='low'"
-                [class.badge-empty]="statusDe(p)==='empty'">
+          <span
+            class="badge"
+            [class.badge-ok]="statusDe(p)==='ok'"
+            [class.badge-low]="statusDe(p)==='low'"
+            [class.badge-empty]="statusDe(p)==='empty'"
+          >
             {{ statusDe(p)==='ok' ? 'OK' : (statusDe(p)==='low' ? 'Baixo' : 'Esgotado') }}
           </span>
         </td>
@@ -54,14 +76,17 @@
           <button class="btn btn-ghost danger" (click)="excluir(p)">Remover</button>
         </td>
       </tr>
+
       <tr *ngIf="!list().length">
-        <td colspan="7" class="muted" style="padding:14px 12px">Nenhum produto encontrado.</td>
+        <td colspan="7" class="muted" style="padding:14px 12px">
+          Nenhum produto encontrado.
+        </td>
       </tr>
     </tbody>
   </table>
 </section>
 
-<!-- Modal simples -->
+<!-- Modal -->
 <div class="overlay" *ngIf="showForm()">
   <div class="modal card">
     <h3>{{ editing() ? 'Editar produto' : 'Novo produto' }}</h3>
@@ -69,37 +94,71 @@
     <div class="form-row">
       <div>
         <div class="label">Nome</div>
-        <input class="input" [(ngModel)]="form().nome" placeholder="Ex.: Arroz 5kg">
+        <input
+          class="input"
+          [ngModel]="form().nome"
+          (ngModelChange)="patchForm('nome', $event)"
+          placeholder="Ex.: Arroz 5kg"
+        />
       </div>
       <div>
         <div class="label">Categoria</div>
-        <input class="input" [(ngModel)]="form().categoria" placeholder="Ex.: Mercearia">
+        <input
+          class="input"
+          [ngModel]="form().categoria"
+          (ngModelChange)="patchForm('categoria', $event)"
+          placeholder="Ex.: Mercearia"
+        />
       </div>
     </div>
 
     <div class="form-row">
       <div>
         <div class="label">Unidade</div>
-        <select class="input" [(ngModel)]="form().unidade">
+        <select
+          class="input"
+          [ngModel]="form().unidade"
+          (ngModelChange)="patchForm('unidade', $event)"
+        >
           <option value="un">un</option>
           <option value="kg">kg</option>
           <option value="l">l</option>
           <option value="cx">cx</option>
         </select>
       </div>
+
       <div>
         <div class="label">Mínimo</div>
-        <input class="input" type="number" min="0" [(ngModel)]="form().minimo">
+        <input
+          class="input"
+          type="number"
+          min="0"
+          [ngModel]="form().minimo"
+          (ngModelChange)="patchForm('minimo', +$event)"
+        />
       </div>
+
       <div>
         <div class="label">Preço (opcional)</div>
-        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="form().preco" placeholder="0,00">
+        <input
+          class="input"
+          type="number"
+          min="0"
+          step="0.01"
+          [ngModel]="form().preco ?? null"
+          (ngModelChange)="patchForm('preco', ($event===''||$event==null)? undefined : +$event)"
+          placeholder="0,00"
+        />
       </div>
     </div>
 
     <div class="actions">
       <button class="btn" (click)="cancelar()">Cancelar</button>
-      <button class="btn btn-primary" [disabled]="!form().nome.trim()" (click)="salvar()">
+      <button
+        class="btn btn-primary"
+        [disabled]="!form().nome?.trim()"
+        (click)="salvar()"
+      >
         {{ editing() ? 'Salvar' : 'Adicionar' }}
       </button>
     </div>

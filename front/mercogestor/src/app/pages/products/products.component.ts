@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Api, Produto, Movimento } from '../../core/api';
 
 type StatusFiltro = 'all' | 'ok' | 'low' | 'empty';
+type FormModel = { nome: string; categoria: string; unidade: string; minimo: number; preco?: number };
 
 @Component({
   selector: 'app-products',
@@ -29,9 +30,7 @@ export class ProductsComponent {
   editing = signal<Produto | null>(null);
 
   // model do formulário
-  form = signal<{nome:string; categoria:string; unidade:string; minimo:number; preco?:number}>({
-    nome: '', categoria: '', unidade: 'un', minimo: 0, preco: undefined
-  });
+  form = signal<FormModel>({ nome: '', categoria: '', unidade: 'un', minimo: 0, preco: undefined });
 
   ngOnInit() {
     this.carregar();
@@ -40,10 +39,16 @@ export class ProductsComponent {
 
   // ===== carregamento =====
   carregar() {
-    this.api.listProducts().subscribe(xs => this.produtos.set(xs));
+    this.api.listProducts().subscribe({
+      next: xs => this.produtos.set(xs),
+      error: err => console.error('listProducts erro', err)
+    });
   }
   carregarMovimentos() {
-    this.api.listMovements().subscribe(ms => this.movimentos.set(ms));
+    this.api.listMovements().subscribe({
+      next: ms => this.movimentos.set(ms),
+      error: err => console.error('listMovements erro', err)
+    });
   }
 
   // categorias dinâmicas
@@ -52,11 +57,11 @@ export class ProductsComponent {
     return Array.from(set).sort();
   });
 
-  // mapa de estoque por produto (soma entradas - saídas)
+  // mapa de estoque por produto (soma entradas - saídas) — chave normalizada como string
   private estoqueMap = computed(() => {
-    const map = new Map<string | number, number>();
+    const map = new Map<string, number>();
     for (const m of this.movimentos()) {
-      const key = m.productId;
+      const key = String(m.productId);
       const prev = map.get(key) ?? 0;
       const delta = m.tipo === 'in' ? m.quantidade : -m.quantidade;
       map.set(key, prev + (Number(delta) || 0));
@@ -91,7 +96,13 @@ export class ProductsComponent {
   }
   editar(p: Produto) {
     this.editing.set(p);
-    this.form.set({ nome:p.nome, categoria:p.categoria || '', unidade:p.unidade, minimo:p.minimo, preco:p.preco });
+    this.form.set({
+      nome: p.nome,
+      categoria: p.categoria || '',
+      unidade: p.unidade,
+      minimo: p.minimo,
+      preco: p.preco
+    });
     this.showForm.set(true);
   }
   excluir(p: Produto) {
@@ -121,8 +132,13 @@ export class ProductsComponent {
     this.editing.set(null);
   }
 
-  // helpers de view (compatíveis com seu template atual)
-  estoqueDe(p: Produto) { return this.estoqueMap().get(p.id!) ?? 0; }
+  // helper para atualizar campos do form (usado no HTML com patchForm('campo', valor))
+  patchForm<K extends keyof FormModel>(key: K, val: FormModel[K]) {
+    this.form.update(f => ({ ...f, [key]: val }));
+  }
+
+  // helpers de view
+  estoqueDe(p: Produto) { return this.estoqueMap().get(String(p.id)) ?? 0; }
   statusDe(p: Produto): StatusFiltro {
     const s = this.estoqueDe(p);
     if (s <= 0) return 'empty';
