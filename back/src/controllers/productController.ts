@@ -36,15 +36,15 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         }
 
         // Checking if the category exists.
-        if (categoria) {
-            const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
-            if (categoryQuerySnap.empty) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Categoria informada não existe.',
-                });
-            }
-        }
+        // if (categoria) {
+        //     const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
+        //     if (categoryQuerySnap.empty) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             error: 'Categoria informada não existe.',
+        //         });
+        //     }
+        // }
 
         // Saving the product in the database.
         const productRef = await productsRef.add(newProduct);

@@ -8,7 +8,7 @@ interface Config {
 };
 
 const config: Config = {
-    frontendUrl: process.env.URL || "http://localhost:3001",
+    frontendUrl: process.env.URL || "http://localhost:4200",
     port: Number(process.env.PORT) || 3000,
 };
 
