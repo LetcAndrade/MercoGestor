@@ -7,6 +7,7 @@ import { MovementsComponent } from "./pages/movements/movements.component";
 import { ProductsComponent } from "./pages/products/products.component";
 import { ReportsComponent } from "./pages/reports/reports.component";
 import { UsersComponent } from "./pages/users/users.component";
+import { LotsComponent } from "./pages/lots/lots.component";
 
 // src/app/app.routes.ts
 export const routes: Routes = [
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'relatorios', component: ReportsComponent, title: 'Relatórios' },
   { path: 'usuarios', component: UsersComponent, title: 'Usuários' },
   { path: 'backup', component: BackupComponent, title: 'Backup' },
+  { path: 'lotes', component: LotsComponent },
 
   { path: '**', redirectTo: '' },
 ];

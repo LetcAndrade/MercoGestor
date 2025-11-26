@@ -1,0 +1,57 @@
+.notif-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ead9c1;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ink, #2b2018);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  transition: background .15s ease, box-shadow .15s ease, transform .08s ease, border-color .15s ease;
+
+  .icon {
+    font-size: 1rem;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.18);
+  }
+
+  .count {
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #f97316;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  &.has-alerts {
+    border-color: #f97316;
+    background: #fff7ed;
+  }
+
+  &.has-critical {
+    .count {
+      background: #dc2626; // vermelho para esgotado
+    }
+  }
+
+  &:hover {
+    box-shadow: 0 8px 18px rgba(161,116,53,.12);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(161,116,53,.16);
+  }
+}

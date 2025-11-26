@@ -1,0 +1,160 @@
+<section class="lots-header card">
+  <div class="left">
+    <h2>Lotes</h2>
+    <p class="muted">
+      Veja cada entrada como um lote, com validade, saldo e sugestão de reposição.
+    </p>
+  </div>
+
+  <div class="right">
+    <select
+      class="input pill"
+      [ngModel]="produtoId()"
+      (ngModelChange)="produtoId.set($event)"
+    >
+      <option value="">Todos produtos</option>
+      <option *ngFor="let p of prods()" [value]="p.id">
+        {{ p.nome }}
+      </option>
+    </select>
+
+    <div class="pill">
+      <label>Validade próxima em até</label>
+      <input
+        class="input"
+        type="number"
+        min="1"
+        [ngModel]="diasNear()"
+        (ngModelChange)="setDias($event)"
+        style="width:80px"
+      >
+      <span>dias</span>
+    </div>
+
+    <button class="btn" (click)="exportCsv()">Exportar CSV</button>
+  </div>
+</section>
+
+<section class="kpis">
+  <div class="kpi card">
+    <span class="kpi-label">Lotes (total)</span>
+    <span class="kpi-value">{{ kTotalLotes() }}</span>
+  </div>
+  <div class="kpi card">
+    <span class="kpi-label">Com saldo</span>
+    <span class="kpi-value">{{ kComSaldo() }}</span>
+  </div>
+  <div class="kpi card warn" [class.zero]="kVencidos()===0">
+    <span class="kpi-label">Lotes vencidos</span>
+    <span class="kpi-value">{{ kVencidos() }}</span>
+  </div>
+  <div class="kpi card warn" [class.zero]="kPertoVencer()===0">
+    <span class="kpi-label">Perto de vencer</span>
+    <span class="kpi-value">{{ kPertoVencer() }}</span>
+  </div>
+</section>
+
+<section class="card" *ngIf="sugestoes().length">
+  <h3>Sugestão de reposição</h3>
+  <p class="muted">
+    Produtos abaixo do mínimo ou com lote mais próximo vencendo em até {{ diasNear() }} dias.
+  </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Saldo total</th>
+        <th>Mínimo</th>
+        <th>Validade mais próxima</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of sugestoes()">
+        <td>{{ s.produto.nome }}</td>
+        <td>{{ s.saldo }}</td>
+        <td>{{ s.minimo }}</td>
+        <td>
+          <ng-container *ngIf="s.dias != null">
+            {{ s.dias }} dia{{ s.dias === 1 ? '' : 's' }}
+          </ng-container>
+          <ng-container *ngIf="s.dias == null">
+            —
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <h3>Lotes detalhados</h3>
+    <span class="muted">{{ lots().length }} linha(s)</span>
+  </div>
+
+  <p *ngIf="erro()" class="error">{{ erro() }}</p>
+  <p *ngIf="loading()" class="muted">Carregando lotes...</p>
+
+  <table class="table" *ngIf="!loading()">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Validade</th>
+        <th>Entrada</th>
+        <th>Qtd. inicial</th>
+        <th>Saldo</th>
+        <th>Em</th>
+        <th>Status</th>
+        <th>Preço unit.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let l of lots()">
+        <td>{{ l.produto.nome }}</td>
+        <td>
+          <span class="date-badge" *ngIf="l.validadeISO; else semVal">
+            {{ l.validadeISO | date:'dd/MM/yyyy' }}
+          </span>
+          <ng-template #semVal>
+            <span class="muted">Sem validade</span>
+          </ng-template>
+        </td>
+        <td>{{ l.dataEntradaISO | date:'dd/MM/yyyy' }}</td>
+        <td>{{ l.quantidadeInicial }}</td>
+        <td [class.neg]="l.status==='empty'">{{ l.saldo }}</td>
+        <td>
+          <ng-container *ngIf="l.diasParaVencer != null">
+            <span class="badge badge-exp" [class.badge-expired]="l.status==='expired'">
+              {{ l.diasParaVencer }} dia{{ l.diasParaVencer === 1 ? '' : 's' }}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="l.diasParaVencer == null">
+            —
+          </ng-container>
+        </td>
+        <td>
+          <span
+            class="badge"
+            [class.badge-ok]="l.status==='ok'"
+            [class.badge-low]="l.status==='nearExpiry'"
+            [class.badge-empty]="l.status==='expired' || l.status==='empty'"
+          >
+            {{ statusLabel(l.status) }}
+          </span>
+        </td>
+        <td>
+          <ng-container *ngIf="l.precoUnitario != null; else semPreco">
+            R$ {{ l.precoUnitario | number:'1.2-2' }}
+          </ng-container>
+          <ng-template #semPreco>—</ng-template>
+        </td>
+      </tr>
+
+      <tr *ngIf="!lots().length && !loading()">
+        <td colspan="8" class="muted" style="padding:14px 12px">
+          Nenhum lote encontrado para os filtros atuais.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

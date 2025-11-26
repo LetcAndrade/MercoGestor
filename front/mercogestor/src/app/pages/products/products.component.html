@@ -160,9 +160,9 @@
       </div>
     </div>
 
-    <!-- ===== Linha 3: Estoque inicial (somente no cadastro) ===== -->
+    <!-- ===== Linha 3: Estoque inicial + Validade inicial (somente no cadastro) ===== -->
     <div class="form-row" *ngIf="!editing()">
-      <div style="grid-column: span 3;">
+      <div style="grid-column: span 2;">
         <div class="label">Estoque inicial</div>
         <input
           class="input"
@@ -173,6 +173,17 @@
           placeholder="Ex.: 20"
         />
         <small class="muted">Uma entrada com esse valor será lançada ao salvar.</small>
+      </div>
+
+      <div>
+        <div class="label">Validade inicial (opcional)</div>
+        <input
+          class="input"
+          type="date"
+          [ngModel]="form().validadeInicial || ''"
+          (ngModelChange)="patchForm('validadeInicial', $event || '')"
+        />
+        <small class="muted">Usada na entrada automática do estoque inicial.</small>
       </div>
     </div>
 

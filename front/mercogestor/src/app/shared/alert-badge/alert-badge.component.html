@@ -1,0 +1,15 @@
+<a
+  routerLink="/alertas"
+  class="notif-pill"
+  [class.has-alerts]="total() > 0"
+  [class.has-critical]="hasCritical()"
+  title="Alertas de estoque e validade"
+>
+  <span class="icon" aria-hidden="true">🔔</span>
+
+  <!-- bolinha “neutra” quando não há alertas -->
+  <span class="dot" *ngIf="total() === 0"></span>
+
+  <!-- contagem quando há alertas -->
+  <span class="count" *ngIf="total() > 0">{{ total() }}</span>
+</a>

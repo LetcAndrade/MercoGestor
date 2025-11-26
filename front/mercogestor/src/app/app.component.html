@@ -11,9 +11,14 @@
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
       <a routerLink="/produtos" routerLinkActive="active">Produtos</a>
       <a routerLink="/movimentacoes" routerLinkActive="active">Movimentações</a>
+      <a routerLink="/lotes" routerLinkActive="active">Lotes</a>
       <a routerLink="/alertas" routerLinkActive="active">Alertas</a>
       <a routerLink="/relatorios" routerLinkActive="active">Relatórios</a>
       <a routerLink="/backup" routerLinkActive="active">Backup</a>
+
+      <!-- 🔔 Badge de alertas -->
+      <app-alert-badge></app-alert-badge>
+
       <button class="btn" (click)="auth.logout()">Sair</button>
     </nav>
   </div>
@@ -23,6 +28,6 @@
   <router-outlet></router-outlet>
 </main>
 
-<!-- ✅ Toasters globais (apenas UMA vez no app) -->
+<!-- Toasters globais -->
 <app-toasts></app-toasts>
 <app-confirm></app-confirm>

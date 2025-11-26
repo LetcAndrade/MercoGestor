@@ -1,0 +1,116 @@
+.lots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lots-header .left {
+  max-width: 420px;
+}
+
+.lots-header .right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fffaf3;
+  border: 1px solid #ead9c1;
+  font-size: 0.85rem;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: #7a6754;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.kpi.warn {
+  border-left: 3px solid #f97316;
+}
+
+.kpi.warn.zero {
+  border-left-color: transparent;
+}
+
+/* tabela */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.date-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff5e6;
+  border: 1px solid #f4d9aa;
+  font-size: 0.8rem;
+}
+
+.badge-exp {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  font-size: 0.78rem;
+}
+
+.badge-expired {
+  background: #fee2e2;
+}
+
+/* reaproveita as classes de badges globais, se já existirem */
+.badge-ok {
+  background: #dcfce7;
+}
+.badge-low {
+  background: #fef9c3;
+}
+.badge-empty {
+  background: #fee2e2;
+}
+
+.neg {
+  color: #b91c1c;
+}
+
+/* responsivo */
+@media (max-width: 768px) {
+  .lots-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lots-header .right {
+    justify-content: flex-start;
+  }
+}

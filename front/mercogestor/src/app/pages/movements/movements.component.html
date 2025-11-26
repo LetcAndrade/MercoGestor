@@ -11,9 +11,24 @@
       <button [class.active]="tipo()==='out'" (click)="tipo.set('out')">Saídas</button>
     </div>
 
-    <input class="input search" [(ngModel)]="busca" placeholder="Buscar produto..." />
-    <input class="input" type="date" [(ngModel)]="de">
-    <input class="input" type="date" [(ngModel)]="ate">
+    <input
+      class="input search"
+      [ngModel]="busca()"
+      (ngModelChange)="busca.set($event)"
+      placeholder="Buscar produto..."
+    />
+    <input
+      class="input"
+      type="date"
+      [ngModel]="de()"
+      (ngModelChange)="de.set($event)"
+    >
+    <input
+      class="input"
+      type="date"
+      [ngModel]="ate()"
+      (ngModelChange)="ate.set($event)"
+    >
 
     <div class="actions">
       <button class="btn" (click)="abrir('in')">+ Entrada</button>

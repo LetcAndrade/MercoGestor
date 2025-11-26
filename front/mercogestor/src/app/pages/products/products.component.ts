@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, Produto, Movimento } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmService } from '../../core/confirm.service';
+import { AlertService } from '../../core/alert.service';
 
 type StatusFiltro = 'all' | 'ok' | 'low' | 'empty';
 
@@ -13,8 +14,9 @@ type FormModel = {
   unidade: string;
   minimo: number;
   preco?: number;
-  estoqueInicial?: number;  // novo no cadastro
-  ajusteEstoque?: number;   // ajuste na edição (pode ser negativo)
+  estoqueInicial?: number;   // novo no cadastro
+  validadeInicial?: string;  // YYYY-MM-DD (para entrada automática)
+  ajusteEstoque?: number;    // ajuste na edição (pode ser negativo)
 };
 
 @Component({
@@ -28,6 +30,7 @@ export class ProductsComponent {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
+  private alerts = inject(AlertService);
 
   // dados principais
   produtos = signal<Produto[]>([]);
@@ -50,6 +53,7 @@ export class ProductsComponent {
     minimo: 0,
     preco: undefined,
     estoqueInicial: 0,
+    validadeInicial: '',
     ajusteEstoque: 0
   });
 
@@ -61,13 +65,20 @@ export class ProductsComponent {
   // ===== carregamento =====
   carregar() {
     this.api.listProducts().subscribe({
-      next: xs => this.produtos.set(xs),
+      next: xs => {
+        this.produtos.set(xs);
+        this.alerts.refresh(); // se mudar produto (minimo/categoria), recomputa alertas
+      },
       error: () => this.toast.error('Falha ao carregar produtos.')
     });
   }
+
   carregarMovimentos() {
     this.api.listMovements().subscribe({
-      next: ms => this.movimentos.set(ms),
+      next: ms => {
+        this.movimentos.set(ms);
+        this.alerts.refresh();
+      },
       error: () => this.toast.error('Falha ao carregar movimentos.')
     });
   }
@@ -118,8 +129,9 @@ export class ProductsComponent {
       unidade: 'un',
       minimo: 0,
       preco: undefined,
-      estoqueInicial: 0,   // visível no cadastro
-      ajusteEstoque: 0     // não usado no cadastro
+      estoqueInicial: 0,
+      validadeInicial: '',
+      ajusteEstoque: 0
     });
     this.showForm.set(true);
   }
@@ -132,8 +144,9 @@ export class ProductsComponent {
       unidade: p.unidade,
       minimo: p.minimo,
       preco: p.preco,
-      estoqueInicial: 0, // não usado em edição
-      ajusteEstoque: 0   // usuário informa +/- na edição
+      estoqueInicial: 0,   // não usado em edição
+      validadeInicial: '', // não usado em edição
+      ajusteEstoque: 0     // usuário informa +/- na edição
     });
     this.showForm.set(true);
   }
@@ -145,7 +158,11 @@ export class ProductsComponent {
     }).then(ok => {
       if (!ok) return;
       this.api.deleteProduct(String(p.id)).subscribe({
-        next: () => { this.toast.success('Produto removido!'); this.carregar(); this.carregarMovimentos(); },
+        next: () => {
+          this.toast.success('Produto removido!');
+          this.carregar();
+          this.carregarMovimentos();
+        },
         error: err => this.toast.error(err?.error?.error || 'Erro ao remover produto.')
       });
     });
@@ -153,9 +170,13 @@ export class ProductsComponent {
 
   salvar() {
     const f = this.form();
-    if (!f.nome.trim()) { this.toast.error('Informe o nome do produto.'); return; }
+    if (!f.nome.trim()) {
+      this.toast.error('Informe o nome do produto.');
+      return;
+    }
 
     const isEdit = !!this.editing();
+
     const base: Produto = {
       id: this.editing()?.id,
       nome: f.nome.trim(),
@@ -165,30 +186,27 @@ export class ProductsComponent {
       preco: f.preco !== undefined ? Number(f.preco) : undefined
     };
 
-    // Envia junto: estoqueInicial (no create). Em edição, ajuste é movimento separado.
-    const payload: any = isEdit
-      ? { ...base }
-      : { ...base, estoqueInicial: Math.max(0, Number(f.estoqueInicial || 0)) };
+    const estoqueInicial = Math.max(0, Number(f.estoqueInicial || 0));
+    const validadeInicial = f.validadeInicial || '';
 
-    this.api.saveProduct(payload).subscribe({
-      next: (res: any) => {
-        // id do produto (cobre diferentes formatos de resposta)
-        const productId =
-          this.editing()?.id ??
-          res?.id ??
-          res?.productId ??
-          res?.product?.id ??
-          payload?.id;
+    if (isEdit) {
+      // === EDIÇÃO: salva produto e, se tiver ajusteEstoque, cria movimento separado ===
+      this.api.saveProduct(base).subscribe({
+        next: (res: any) => {
+          const productId =
+            this.editing()?.id ??
+            res?.id ??
+            res?.productId ??
+            res?.product?.id ??
+            base.id;
 
-        const after = () => {
-          this.toast.success(isEdit ? 'Produto atualizado!' : 'Produto adicionado!');
-          this.cancelar();
-          this.carregar();
-          this.carregarMovimentos();
-        };
+          const after = () => {
+            this.toast.success('Produto atualizado!');
+            this.cancelar();
+            this.carregar();
+            this.carregarMovimentos();
+          };
 
-        // Em edição: se ajusteEstoque ≠ 0, cria movimento
-        if (isEdit) {
           const ajuste = Number(f.ajusteEstoque || 0);
           if (productId && ajuste !== 0) {
             const iso = new Date().toISOString();
@@ -197,17 +215,58 @@ export class ProductsComponent {
               tipo: ajuste > 0 ? 'in' : 'out',
               quantidade: Math.abs(ajuste),
               data: iso
-            }).subscribe({
+            } as any).subscribe({
               next: () => after(),
               error: () => after()
             });
-            return;
+          } else {
+            after();
           }
-        }
-        after();
-      },
-      error: err => this.toast.error(err?.error?.error || 'Erro ao salvar produto.')
-    });
+        },
+        error: err => this.toast.error(err?.error?.error || 'Erro ao salvar produto.')
+      });
+
+    } else {
+      // === CRIAÇÃO: salva produto e lança entrada automática com validade opcional ===
+      this.api.saveProduct(base).subscribe({
+        next: (res: any) => {
+          const productId =
+            res?.id ??
+            res?.productId ??
+            res?.product?.id ??
+            base.id;
+
+          const after = () => {
+            this.toast.success('Produto adicionado!');
+            this.cancelar();
+            this.carregar();
+            this.carregarMovimentos();
+          };
+
+          if (productId && estoqueInicial > 0) {
+            const iso = new Date().toISOString();
+            const mov: any = {
+              productId: String(productId),
+              tipo: 'in',
+              quantidade: estoqueInicial,
+              data: iso
+            };
+            if (validadeInicial) {
+              // backend aceita 'validadeLote'; usamos formato YYYY-MM-DD vindo do input
+              mov.validadeLote = validadeInicial;
+            }
+
+            this.api.addMovement(mov).subscribe({
+              next: () => after(),
+              error: () => after()
+            });
+          } else {
+            after();
+          }
+        },
+        error: err => this.toast.error(err?.error?.error || 'Erro ao salvar produto.')
+      });
+    }
   }
 
   cancelar() {
@@ -223,12 +282,16 @@ export class ProductsComponent {
   patchForm<K extends keyof FormModel>(key: K, val: FormModel[K]) {
     this.form.update(f => ({ ...f, [key]: val }));
   }
-  estoqueDe(p: Produto) { return this.estoqueMap().get(String(p.id)) ?? 0; }
+
+  estoqueDe(p: Produto) {
+    return this.estoqueMap().get(String(p.id)) ?? 0;
+  }
 
   estoqueAtual() {
     const p = this.editing();
     return p ? this.estoqueDe(p) : 0;
   }
+
   estoquePrevisto() {
     const atual = this.estoqueAtual();
     const delta = Number(this.form().ajusteEstoque || 0);
