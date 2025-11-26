@@ -1,4 +1,4 @@
-<header class="header" *ngIf="auth.isAuthed()">
+<header class="header">
   <div class="container header-inner">
     <a class="brand" routerLink="/">
       <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
@@ -20,5 +20,9 @@
 </header>
 
 <main class="container page">
-  <router-outlet />
+  <router-outlet></router-outlet>
 </main>
+
+<!-- ✅ Toasters globais (apenas UMA vez no app) -->
+<app-toasts></app-toasts>
+<app-confirm></app-confirm>

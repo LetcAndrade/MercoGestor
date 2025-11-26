@@ -1,0 +1,189 @@
+/* ===============================
+   TOAST (canto superior direito)
+   =============================== */
+.toast-wrap{
+  position: fixed;
+  right: 16px;
+  top: 16px;                 /* canto superior direito */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;      /* não bloqueia cliques no app */
+}
+
+.toast{
+  pointer-events: all;       /* permite clicar no toast */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #EAD9C1;
+  background: linear-gradient(180deg, #FFF9F2, #FFF6E9);
+  box-shadow: 0 10px 30px rgba(33,27,20,.12);
+  max-width: min(440px, 92vw);
+
+  /* animação suave (desce levemente) */
+  transform: translateY(-6px);
+  opacity: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation: toastIn 240ms cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+@keyframes toastIn {
+  from {
+    transform: translateY(-6px);
+    opacity: 0;
+    filter: saturate(0.96) brightness(1.01);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    filter: none;
+  }
+}
+
+.toast.hide{ display: none; }
+
+.toast .toast-icon{
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px;
+  border: 1px solid #E6D3BA;
+  background: #fff;
+}
+.toast .ic{ fill:#6B5A46 }
+
+.toast .toast-body{ line-height: 1.25 }
+.toast .toast-title{ font-weight: 700; margin-bottom: 2px; color: #3B2D22 }
+.toast .toast-text{ color: #6B5A46; word-wrap: anywhere }
+
+.toast-close{
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: #7A6651;
+  padding: 0 4px;
+  border-radius: 6px;
+}
+.toast-close:hover{ color:#4F3E2C; background: rgba(0,0,0,.05); }
+
+/* variações de status */
+.toast.ok{
+  border-color:#D8E9DE;
+  background:linear-gradient(180deg,#F6FFF8,#F2FBF6);
+}
+.toast.ok .toast-icon{ border-color:#CDE6D3 }
+.toast.ok .ic{ fill:#2D5C42 }
+.toast.ok .toast-title{ color:#2D5C42 }
+
+.toast.err{
+  border-color:#F4C9C1;
+  background:linear-gradient(180deg,#FFF5F3,#FFF0ED);
+}
+.toast.err .toast-icon{ border-color:#F0C9C4 }
+.toast.err .ic{ fill:#8E3D33 }
+.toast.err .toast-title{ color:#8E3D33 }
+
+.toast.info{
+  border-color:#E6D3BA;
+  background:linear-gradient(180deg,#FFFAF2,#FFF6E9);
+}
+
+/* reduz movimento para quem prefere menos animação */
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; opacity: 1; transform: none; }
+}
+
+
+/* ===============================
+   MODAL (central)
+   =============================== */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(33,27,20,.28);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.modal-overlay.hide{ display: none; }
+
+.modal-toast{
+  width: min(560px, 96vw);
+  border: 1px solid #EAD9C1;
+  border-radius: 14px;
+  background: #FFF8EC;
+  box-shadow: 0 18px 60px rgba(33,27,20,.25);
+  overflow: hidden;
+
+  transform: translateY(4px);
+  opacity: 0;
+  animation: modalIn .18s ease-out forwards;
+}
+@keyframes modalIn { to { transform: translateY(0); opacity: 1; } }
+
+.modal-toast-header{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #FFF3E1, #FFF0DA);
+  border-bottom: 1px solid #EAD9C1;
+}
+.modal-toast-title{
+  margin: 0;
+  font-size: 18px;
+  color: #3B2D22;
+  font-weight: 700;
+}
+.modal-toast-icon{
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #E6D3BA;
+  background: #fff;
+}
+.modal-toast .ic{ fill:#6B5A46 }
+
+.modal-toast-close{
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  color: #7A6651;
+  border-radius: 8px;
+  padding: 2px 6px;
+}
+.modal-toast-close:hover{ color:#4F3E2C; background: rgba(0,0,0,.05); }
+
+.modal-toast-body{
+  padding: 16px;
+  color: #6B5A46;
+}
+.modal-toast-actions{
+  padding: 12px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #FFF6E9;
+  border-top: 1px solid #EAD9C1;
+}
+
+.modal-toast.ok .modal-toast-title{ color:#2D5C42 }
+.modal-toast.err .modal-toast-title{ color:#8E3D33 }

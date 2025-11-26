@@ -1,229 +1,240 @@
 import type { Request, Response, NextFunction } from "express";
 import { db } from "../config/firebase";
 
-// Create a product.
+/* ------------------------- helpers ------------------------- */
+
+function toNumber(v: unknown): number | undefined {
+  if (v === null || v === undefined || v === "") return undefined;
+  const n = typeof v === "number" ? v : parseFloat(String(v));
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function normStr(v?: string | null) {
+  return (v ?? "").trim();
+}
+
+async function ensureCategoryExists(categoriaRaw?: string | null): Promise<string | null> {
+  const categoria = normStr(categoriaRaw);
+  if (!categoria) return null;
+
+  const categoriaLower = categoria.toLowerCase();
+  const col = db.collection("categorias");
+
+  // 1) Tenta por campo normalizado (bases novas)
+  let qs = await col.where("categoriaLower", "==", categoriaLower).limit(1).get();
+
+  // 2) Fallback p/ bases antigas (campo "categoria" simples)
+  if (qs.empty) {
+    qs = await col.where("categoria", "==", categoria).limit(1).get();
+  }
+
+
+  // Não existe → cria
+  const doc = await col.add({
+    categoria,
+    categoriaLower,
+    createdAt: new Date(),
+  });
+  return doc.id;
+}
+
+/* ------------------------- CREATE ------------------------- */
+
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
-    // Attempts to create a product, and if an error occurs, passes the error to the error handler.
-    try {
-        const { nome, unidade, minimo, preco, categoria } = req.body;
+  try {
+    // agora aceitamos estoqueInicial no body
+    let { nome, unidade, minimo, preco, categoria, estoqueInicial } = req.body as {
+      nome?: string; unidade?: string; minimo?: any; preco?: any; categoria?: string | null; estoqueInicial?: any;
+    };
 
-        // Verifying that the received data is valid.
-        if (!nome || !unidade || minimo == undefined) {
-            return res.status(400).json({
-                success: false,
-                error: 'Nome, unidade e quantidade mínima são obrigatórios.',
-            });
-        }
+    nome = normStr(nome);
+    unidade = normStr(unidade);
+    categoria = normStr(categoria);
 
-        // Creating the product object.
-        const newProduct = {
-            nome: nome,
-            unidade: unidade,
-            minimo: parseFloat(minimo),
-            preco: parseFloat(preco) ?? null,
-            categoria: categoria ?? '',
-        };
+    const minimoNum = toNumber(minimo);
+    const precoNum  = toNumber(preco);
+    const estoqueInicialNum = Math.max(0, toNumber(estoqueInicial) ?? 0);
 
-        // Checking if the product already exists.
-        const productsRef = db.collection('produtos');
-        const productQuerySnap = await productsRef.where('nome', '==', nome).limit(1).get();
-
-        if (!productQuerySnap.empty) {
-            return res.status(409).json({
-                success: false,
-                error: 'Produto já existe.',
-            });
-        }
-
-        // Checking if the category exists.
-        // if (categoria) {
-        //     const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
-        //     if (categoryQuerySnap.empty) {
-        //         return res.status(400).json({
-        //             success: false,
-        //             error: 'Categoria informada não existe.',
-        //         });
-        //     }
-        // }
-
-        // Saving the product in the database.
-        const productRef = await productsRef.add(newProduct);
-
-        res.status(201).json({
-            success: true,
-            message: 'Produto cadastrado com sucesso!',
-            productId: productRef.id,
-        });
-    } catch (error) {
-        next(error);
+    if (!nome || !unidade || minimoNum === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: "Nome, unidade e quantidade mínima são obrigatórios.",
+      });
     }
+
+    // Garante categoria (cria se não existir). Se vazio, salva vazio mesmo.
+    await ensureCategoryExists(categoria);
+
+    // Evita duplicidade por (nome + categoria)
+    const productsRef = db.collection("produtos");
+    const dup = await productsRef
+      .where("nome", "==", nome)
+      .where("categoria", "==", categoria ?? "")
+      .limit(1)
+      .get();
+
+    if (!dup.empty) {
+      return res.status(409).json({ success: false, error: "Produto já existe." });
+    }
+
+    const newProduct = {
+      nome,
+      unidade,
+      minimo: minimoNum!,
+      preco: precoNum ?? null,
+      categoria: categoria ?? "",
+      createdAt: new Date(),
+    };
+
+    const productRef = await productsRef.add(newProduct);
+
+    // 🔥 Movimento de estoque inicial (se informado)
+    if (estoqueInicialNum > 0) {
+      const now = new Date().toISOString();
+      await db.collection("movimentos").add({
+        productId: productRef.id,
+        tipo: "in",
+        quantidade: estoqueInicialNum,
+        data: now,          // algumas partes do app usam 'data'
+        date: now,          // outras usam 'date'
+        source: "initial_stock",
+        createdAt: new Date(),
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Produto cadastrado com sucesso!",
+      productId: productRef.id,
+      product: { id: productRef.id, ...newProduct },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Read all products.
-export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-    // Attempts to read the products, and if an error occurs, passes the error to the error handler.
-    try {
-        const productsQuerySnap = await db.collection('produtos').get();
+/* ------------------------- READ ALL ------------------------- */
 
-        // Checking if there are products.
-        if (productsQuerySnap.empty) {
-            return res.status(200).json({
-                success: true,
-                message: 'Nenhum produto cadastrado.',
-                products: [],
-            });
-        }
-
-        // Converting to JS object and returning.
-        const products = productsQuerySnap.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-
-        res.status(200).json({
-            success: true,
-            products,
-        });
-    } catch (error) {
-        next(error);
+export const getProducts = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const snap = await db.collection("produtos").get();
+    if (snap.empty) {
+      return res.status(200).json({ success: true, message: "Nenhum produto cadastrado.", products: [] });
     }
+
+    const products = snap.docs.map(d => ({ id: d.id, ...(d.data() ?? {}) }));
+    return res.status(200).json({ success: true, products });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Read single product.
-export const getProductById = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
-    // Attempts to read a product, and if an error occurs, passes the error to the error handler.
-    try {
-        const id = req.params.id;
-        const productSnap = await db.collection('produtos').doc(id).get();
+/* ------------------------- READ ONE ------------------------- */
 
-        // Checking if the product with the specified ID exists.
-        if (!productSnap.exists) {
-            return res.status(404).json({
-                success: false,
-                error: 'Produto não encontrado.',
-            });
-        }
+export const getProductById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+    const doc = await db.collection("produtos").doc(id).get();
+    if (!doc.exists) return res.status(404).json({ success: false, error: "Produto não encontrado." });
 
-        res.status(200).json({
-            success: true,
-            product: {
-                id: productSnap.id,
-                ...productSnap.data(),
-            },
-        });
-    } catch(error) {
-        next(error);
-    }
+    return res.status(200).json({ success: true, product: { id: doc.id, ...(doc.data() ?? {}) } });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Update a product.
-export const updateProduct = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
-    // Attempts to update a product, and if an error occurs, passes the error to the error handler.
-    try {
-        const id = req.params.id;
-        const { nome, unidade, minimo, preco, categoria } = req.body;
+/* ------------------------- UPDATE ------------------------- */
 
-        const productRef = db.collection('produtos').doc(id);
-        const productSnap = await productRef.get();
+export const updateProduct = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+    const ref = db.collection("produtos").doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ success: false, error: "Produto não encontrado." });
 
-        // Checking if the product with the specified ID exists.
-        if (!productSnap.exists) {
-            return res.status(404).json({
-                success: false,
-                error: 'Produto não encontrado.',
-            });
-        }
+    const { nome, unidade, minimo, preco, categoria } = req.body as {
+      nome?: string; unidade?: string; minimo?: any; preco?: any; categoria?: string | null;
+    };
 
-        // Creating a product with updated fields, and checking if the category exists (if it is specified).
-        const updatedFields: Record<string, any> = {};
-        if (nome !== undefined) updatedFields.nome = nome;
-        if (unidade !== undefined) updatedFields.unidade = unidade;
-        if (minimo !== undefined) updatedFields.minimo = parseFloat(minimo);
-        if (preco !== undefined) updatedFields.preco = parseFloat(preco);
-        if (categoria !== undefined) {
-            if (categoria) {
-                const categoryQuerySnap = await db.collection('categorias').where('categoria', '==', categoria).limit(1).get();
-                if (categoryQuerySnap.empty) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Categoria informada não existe.',
-                    });
-                }
-            }
+    const updated: Record<string, any> = {};
 
-            updatedFields.categoria = categoria;
-        }
-
-        // Checking if any fields have been filled in.
-        if (Object.keys(updatedFields).length == 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'Nenhum campo para atualização foi enviado.',
-            });
-        }
-
-        // Updating the database and returning.
-        await productRef.update({
-            ...updatedFields,
-        });
-
-        const updatedProductSnap = await productRef.get();
-
-        res.status(200).json({
-            success: true,
-            message: 'Produto atualizado com sucesso!',
-            product: {
-                id: updatedProductSnap.id,
-                ...updatedProductSnap.data(),
-            },
-        });
-    } catch (error) {
-        next(error);
+    if (nome !== undefined) {
+      const v = normStr(nome);
+      if (!v) return res.status(400).json({ success: false, error: "Nome não pode ser vazio." });
+      updated.nome = v;
     }
+    if (unidade !== undefined) {
+      const v = normStr(unidade);
+      if (!v) return res.status(400).json({ success: false, error: "Unidade não pode ser vazia." });
+      updated.unidade = v;
+    }
+    if (minimo !== undefined) {
+      const n = toNumber(minimo);
+      if (n === undefined) return res.status(400).json({ success: false, error: "Ponto de reposição inválido." });
+      updated.minimo = n;
+    }
+    if (preco !== undefined) {
+      const n = toNumber(preco);
+      updated.preco = n ?? null;
+    }
+    if (categoria !== undefined) {
+      const v = normStr(categoria);
+      if (v) {
+        await ensureCategoryExists(v); // cria se não existir
+        updated.categoria = v;
+      } else {
+        updated.categoria = ""; // permitir limpar
+      }
+    }
+
+    if (Object.keys(updated).length === 0) {
+      return res.status(400).json({ success: false, error: "Nenhum campo para atualização foi enviado." });
+    }
+
+    await ref.update({ ...updated, updatedAt: new Date() });
+
+    const updatedDoc = await ref.get();
+    return res.status(200).json({
+      success: true,
+      message: "Produto atualizado com sucesso!",
+      product: { id: updatedDoc.id, ...(updatedDoc.data() ?? {}) },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Delete a product.
-export const deleteProduct = async (req: Request<{id: string}>, res: Response, next: NextFunction) => {
-    // Attempts to delete a product, and if an error occurs, passes the error to the next function.
-    try {
-        const id = req.params.id;
+/* ------------------------- DELETE ------------------------- */
 
-        const productRef = db.collection('produtos').doc(id);
-        const productSnap = await productRef.get();
+export const deleteProduct = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+    const ref = db.collection("produtos").doc(id);
+    const snap = await ref.get();
 
-        // Checking if the product with the specified ID exists.
-        if (!productSnap.exists) {
-            return res.status(404).json({
-                success: false,
-                error: 'Produto não encontrado.',
-            });
-        }
+    if (!snap.exists) return res.status(404).json({ success: false, error: "Produto não encontrado." });
 
-        // Deleting all movements with the product.
-        const movementsQuerySnap = await db.collection('movimentos').where('productId', '==', id).get();
-        if (!movementsQuerySnap.empty) {
-            const batch = db.batch();
-
-            movementsQuerySnap.docs.splice(0, 500).forEach(doc => {
-                batch.delete(doc.ref);
-            });
-
-            await batch.commit();
-        }
-
-        // Deleting the product.
-        const data = productSnap.data();
-        await productRef.delete();
-
-        res.status(200).json({
-            success: true,
-            message: 'Produto removido com sucesso!',
-            deletedProduct: {
-                id,
-                ...data,
-            },
-        });
-    } catch (error) {
-        next(error);
+    // Remove movimentos do produto (em chunks de 500)
+    const movs = await db.collection("movimentos").where("productId", "==", id).get();
+    if (!movs.empty) {
+      const docs = movs.docs;
+      for (let i = 0; i < docs.length; i += 500) {
+        const chunk = docs.slice(i, i + 500);
+        const batch = db.batch();
+        chunk.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
     }
+
+    const data = snap.data() ?? {};
+    await ref.delete();
+
+    return res.status(200).json({
+      success: true,
+      message: "Produto removido com sucesso!",
+      deletedProduct: { id, ...data },
+    });
+  } catch (error) {
+    next(error);
+  }
 };

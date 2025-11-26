@@ -1,0 +1,23 @@
+<div class="confirm-overlay" *ngIf="state().open" (click)="onOverlayClick()">
+  <div class="confirm card" (click)="stop($event)" role="alertdialog" aria-modal="true">
+    <div class="confirm-header" [class.danger]="state().variant==='danger'">
+      <h3 class="confirm-title">
+        {{ state().variant==='danger' ? 'Confirmar exclusão' : 'Confirmação' }}
+      </h3>
+      <button class="confirm-close" (click)="confirmSvc.cancel()" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="confirm-body">{{ state().message }}</div>
+
+    <div class="confirm-actions">
+      <button class="btn" (click)="confirmSvc.cancel()">{{ state().cancelText }}</button>
+      <button
+        class="btn btn-primary"
+        [class.btn-danger]="state().variant==='danger'"
+        (click)="confirmSvc.confirm()"
+      >
+        {{ state().confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

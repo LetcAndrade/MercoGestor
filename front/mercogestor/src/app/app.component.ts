@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';            // ⬅️ aqui
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from './core/auth.service';
 import { BackupService } from './core/backup.service';
+import { ToastsComponent } from './toast/toast.component';
+import { ConfirmComponent } from './confirm/confirm.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive], // ⬅️ adicionado
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastsComponent, ConfirmComponent], // ⬅️ adicionado
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

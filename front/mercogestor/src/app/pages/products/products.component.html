@@ -15,7 +15,7 @@
       placeholder="Buscar por nome..."
     />
 
-    <!-- categoria -->
+    <!-- categoria (filtro) -->
     <select
       class="input pill"
       [ngModel]="cat()"
@@ -29,7 +29,7 @@
     <select
       class="input pill"
       [ngModel]="status()"
-      
+      (ngModelChange)="setStatus($event)"
     >
       <option value="all">Todos</option>
       <option value="ok">OK</option>
@@ -48,7 +48,7 @@
         <th>Produto</th>
         <th>Categoria</th>
         <th>Un.</th>
-        <th>Mínimo</th>
+        <th>Ponto de reposição</th>
         <th>Em estoque</th>
         <th>Status</th>
         <th style="width:1%"></th>
@@ -91,8 +91,9 @@
   <div class="modal card">
     <h3>{{ editing() ? 'Editar produto' : 'Novo produto' }}</h3>
 
-    <div class="form-row">
-      <div>
+    <!-- ===== Linha 1: Nome (2 col) | Categoria (1 col) ===== -->
+    <div class="form-row" style="margin-top:6px">
+      <div style="grid-column: span 2;">
         <div class="label">Nome</div>
         <input
           class="input"
@@ -101,6 +102,7 @@
           placeholder="Ex.: Arroz 5kg"
         />
       </div>
+
       <div>
         <div class="label">Categoria</div>
         <input
@@ -108,10 +110,15 @@
           [ngModel]="form().categoria"
           (ngModelChange)="patchForm('categoria', $event)"
           placeholder="Ex.: Mercearia"
+          list="categorias-opcoes"
         />
+        <datalist id="categorias-opcoes">
+          <option *ngFor="let c of categorias()" [value]="c"></option>
+        </datalist>
       </div>
     </div>
 
+    <!-- ===== Linha 2: Unidade | Ponto de reposição | Preço ===== -->
     <div class="form-row">
       <div>
         <div class="label">Unidade</div>
@@ -128,13 +135,14 @@
       </div>
 
       <div>
-        <div class="label">Mínimo</div>
+        <div class="label">Ponto de reposição</div>
         <input
           class="input"
           type="number"
           min="0"
           [ngModel]="form().minimo"
           (ngModelChange)="patchForm('minimo', +$event)"
+          placeholder="Ex.: 10"
         />
       </div>
 
@@ -145,18 +153,53 @@
           type="number"
           min="0"
           step="0.01"
-          [ngModel]="form().preco ?? null"
+          [ngModel]="(form().preco != null ? form().preco : null)"
           (ngModelChange)="patchForm('preco', ($event===''||$event==null)? undefined : +$event)"
           placeholder="0,00"
         />
       </div>
     </div>
 
-    <div class="actions">
+    <!-- ===== Linha 3: Estoque inicial (somente no cadastro) ===== -->
+    <div class="form-row" *ngIf="!editing()">
+      <div style="grid-column: span 3;">
+        <div class="label">Estoque inicial</div>
+        <input
+          class="input"
+          type="number"
+          min="0"
+          [ngModel]="form().estoqueInicial ?? 0"
+          (ngModelChange)="patchForm('estoqueInicial', (+$event < 0 ? 0 : +$event))"
+          placeholder="Ex.: 20"
+        />
+        <small class="muted">Uma entrada com esse valor será lançada ao salvar.</small>
+      </div>
+    </div>
+
+    <!-- ===== Linha 3 (edição): Ajuste de estoque ===== -->
+    <div class="form-row" *ngIf="editing()">
+      <div style="grid-column: span 3;">
+        <div class="label">Ajuste de estoque</div>
+        <input
+          class="input"
+          type="number"
+          [ngModel]="form().ajusteEstoque ?? 0"
+          (ngModelChange)="patchForm('ajusteEstoque', +$event)"
+          placeholder="Ex.: +5 ou -3"
+        />
+        <small class="muted">
+          Atual: {{ estoqueAtual() }} &nbsp;→&nbsp;
+          Após ajuste: <strong>{{ estoquePrevisto() }}</strong>
+        </small>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="actions" style="margin-top:8px">
       <button class="btn" (click)="cancelar()">Cancelar</button>
       <button
         class="btn btn-primary"
-        
+        [disabled]="!form().nome.trim() || !form().unidade || form().minimo===null || form().minimo===undefined"
         (click)="salvar()"
       >
         {{ editing() ? 'Salvar' : 'Adicionar' }}
