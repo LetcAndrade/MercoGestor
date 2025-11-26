@@ -31,8 +31,8 @@
     >
 
     <div class="actions">
-      <button class="btn" (click)="abrir('in')">+ Entrada</button>
-      <button class="btn" (click)="abrir('out')">– Saída</button>
+      <button class="btn" (click)="abrir('in')">Registrar entrada</button>
+      <button class="btn" (click)="abrir('out')">Registrar saída</button>
     </div>
   </div>
 </section>
@@ -86,7 +86,7 @@
 <!-- Modal -->
 <div class="overlay" *ngIf="showForm()">
   <div class="modal card">
-    <h3>{{ formTipo()==='in' ? 'Lançar entrada' : 'Lançar saída' }}</h3>
+    <h3>{{ formTipo()==='in' ? 'Registrar entrada' : 'Registrar saída' }}</h3>
 
     <div class="form-row">
       <div>
