@@ -5,8 +5,8 @@
     <p class="muted">Resumo do seu mercadinho, com um toque leve e ilustrado.</p>
   </div>
   <div class="hero-actions">
-    <a routerLink="/produtos" class="btn">+ Novo produto</a>
-    <a routerLink="/movimentacoes" class="btn">Lançar movimentação</a>
+    <a routerLink="/produtos" class="btn">Visualizar produtos</a>
+    <a routerLink="/movimentacoes" class="btn">Visualizar movimentações no estoque</a>
     <button class="btn" (click)="seed()">Carregar dados de exemplo</button>
   </div>
 </section>
@@ -39,7 +39,7 @@
     <div class="chart-box"><canvas #lineCanvas></canvas></div>
   </div>
   <div class="chart card">
-    <h3>Top saídas por produto</h3>
+    <h3>Produtos mais vendidos</h3>
     <div class="chart-box"><canvas #barCanvas></canvas></div>
   </div>
 </section>
